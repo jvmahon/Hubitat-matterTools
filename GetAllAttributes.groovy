@@ -1,9 +1,10 @@
 metadata {
-   definition (name: "Get and Store All Attributes", namespace: "matterTools", author: "jvm33") {
+   definition (name: "Get All Attributes and Events", namespace: "matterTools", author: "jvm33") {
       capability "Refresh"
       capability "Configuration"
       command "unsubscribeAll"
       command "showStoredAttributeData"
+      // command "eventPaths"
    }
 }
 import hubitat.matter.DataType
@@ -22,6 +23,26 @@ void storeRetrievedData(Map descMap){
                 .put(descMap.attrId, descMap.value)
 
 }
+
+Object getStoredAttributeData(Map params = [:]){
+    Map inputs = [endpoint:null, cluster:null, attrId:null] << params
+    try { 
+        assert inputs.endpoint instanceof String
+        assert inputs.cluster instanceof String
+        assert inputs.attrId instanceof String
+    } catch(AssertionError e) {
+            log.error "<pre>${e}"
+    }
+    
+    String netId = device?.getDeviceNetworkId()
+    
+    globalDataStorage.get(netId, new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1))
+        ?.get(descMap.endpoint)
+            ?.get(descMap.cluster)
+                ?.get(descMap.attrId)
+
+}
+
 
 void showStoredAttributeData(){
     String netId = device?.getDeviceNetworkId()
@@ -47,18 +68,31 @@ void unsubscribeAll(){
 }
 
 void subscribeAll(){
-    String cmd = 'he subscribe 0x01 0xFF [{"ep":"0xFFFF","cluster":"0xFFFFFFFF","attr":"0xFFFFFFFF"}]'
-    log.info "Sending command to Subscribe for all events with a 1 second minimum time: " + cmd
+    
+    String cmd = 'he subscribe 0x00 0xFF [{"ep":"0xFFFF","cluster":"0xFFFFFFFF","attr":"0xFFFFFFFF"}]'
+    log.info "Sending command to Subscribe for all attributes with a 0 second minimum time: " + cmd
     sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
+    
+
+    /*
+    cmd = 'he subscribe 0x00 0xFF [{"ep":"0xFFFF","cluster":"0xFFFFFFFF","evt":"0xFFFFFFFF"}]'
+    log.info "Sending command to Subscribe for all events with a 0 second minimum time: " + cmd
+    sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
+    */
+}
+
+void eventPaths(){ 
+    List eventPaths = []
+    eventPaths.add(matter.eventPath("FFFF", 0xFFFF, 0xFFFF))
+    log.debug matter.subscribe(0, 0x00FF, eventPaths)
 }
 
 def parse(String description) {
-    log.info " " // blank line insert
-    log.info "In parse function, received description: ${description}"
-   def descMap = matter.parseDescriptionAsMap(description)
-    log.info "Parsed message in Mapped form: ${descMap}"
-    storeRetrievedData(descMap)
-
+    def descMap
+    try {
+        descMap = matter.parseDescriptionAsMap(description)
+        storeRetrievedData(descMap)
+    } catch (e) {
+        log.error "Caught error ${e} trying to parse descripiton ${description}"
+    }
 }
-
-
