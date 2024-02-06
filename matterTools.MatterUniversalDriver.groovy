@@ -10,6 +10,7 @@ import  hubitat.matter.DataType
 #include matterTools.ColorCluster0x0300
 #include matterTools.IlluminanceCluster0x0400
 #include matterTools.occupancySensingCluster0x0406
+#include matterTools.createMatterEvents
 #include matterTools.commonDriverMethods
 #include matterTools.matterHelperUtilities
 #include matterTools.concurrentRuntimeDataStorage

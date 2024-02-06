@@ -32,10 +32,13 @@ void setColor(Map params = [:]){ // UI passes a Map so trying to set defaults he
         Map inputs = [ep:getEndpointIdInt(device), transitionTime10ths: 0, hue: null, saturation: null, level: null] << params
         assert inputs.keySet().containsAll(params.keySet()) // checks that all user-specified parameters use permitted labels.
         assert inputs.ep instanceof Integer
-	    assert (inputs.hue >= 0) && (inputs.hue <= 100) && (inputs.saturation >= 0) && (inputs.saturation <= 100)
+	    assert (inputs.saturation instanceof Integer) && (inputs.saturation >= 0) && (inputs.saturation <= 100)
+	    assert (inputs.hue instanceof Integer) // Hue is degrees around a circule - don't need to range check, but mod with 100 before use!
+                                                        
         assert inputs.transitionTime10ths instanceof Integer
-    
-        Integer targetHue = Math.round(Math.max(Math.min((Integer) inputs.hue, 100), 0) * 2.54)
+                                                                                      
+        inputs.hue = inputs.hue %100
+        Integer targetHue = Math.round(inputs.hue * 2.54) // Hue is a color wheel so values > 100 are not an error, but should be 'modulus'-ed to 0-99
  	    Integer targetSat = Math.round(Math.max(Math.min((Integer) inputs.saturation, 100), 0) * 2.54)
     
         String hexHue = HexUtils.integerToHexString(targetHue, 1) // 1 Byte

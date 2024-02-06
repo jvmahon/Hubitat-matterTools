@@ -44,6 +44,26 @@ void parse(String description) {
         descMap = matter.parseDescriptionAsMap(description)
         descMap.put("endpointInt", (Integer.parseInt(descMap.endpoint, 16))) // supplement map with endpointId in integer form
         storeRetrievedData(descMap)
+        log.info "-----------------: ${descMap}"
+        hubEvents = getHubitatEvents(descMap)
+    } catch (AssertionError e) {
+        log.error "<pre>${e}"
+        log.error getStackTrace(e)
+    } catch(e){
+        log.error "<pre>${e}"
+        log.error getStackTrace(e)    
+    }
+    log.debug hubEvents
+    if (hubEvents?.size()) sendEventsToEndpointByParse(events:hubEvents, ep:(descMap.endpointInt))
+}
+void parseOld(String description) {
+    Map descMap
+    List<Map> hubEvents = []
+
+    try {
+        descMap = matter.parseDescriptionAsMap(description)
+        descMap.put("endpointInt", (Integer.parseInt(descMap.endpoint, 16))) // supplement map with endpointId in integer form
+        storeRetrievedData(descMap)
 
 		// If the relevant cluster library has been included, then call it!
 		switch(descMap.clusterInt) {

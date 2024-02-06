@@ -103,8 +103,7 @@ List<Map> processClusterResponse_0006(Map descMap){
         case 0x4003: // StartUpOnOff
             String startupState = [    "00":"Off", 
                                "01":"On", 
-                               "02":"Off", 
-                               "FF":"Prior State"].get(descMap.value)
+                               "02":"Toggle"].get(descMap.value)
             hubEvents << [name:"stateOnPowerup", value: startupState, isStateChange:false]
             break
         case 0xFFF8: // GeneratedCommandList
