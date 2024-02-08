@@ -10,15 +10,44 @@ metadata {
         attribute "MaxMeasuredValueLux", "number"
         attribute "LuxMeasurementTolerance", "number"
         attribute "LightSensorType", "string"
+        
+        attribute "Status", "number"
+		attribute "Order", "string"
+		attribute "Description", "string"
+		attribute "WiredAssessedInputVoltage", "number"
+		attribute "WiredAssessedInputFrequency", "number"
+		attribute "WiredCurrentType", "string"
+		attribute "WiredAssessedCurrent", "number"
+		attribute "WiredNominalVoltage", "number"
+		attribute "WiredMaximumCurrent", "number"
+		attribute "WiredPresent", "string"
+		attribute "ActiveWiredFaults", "string"
+		attribute "BatVoltage", "number"
+		attribute "battery", "number"
+		attribute "BatTimeRemaining", "number"
+		attribute "BatChargeLevel", "number"
+		attribute "BatReplacementNeeded", "string"
+		attribute "BatReplaceability", "string"
+		attribute "BatPresent", "string"
+		attribute "ActiveBatFaults", "string"
+		attribute "BatReplacementDescription", "string"
+		attribute "BatCommonDesignation", "string"
+		attribute "BatANSIDesignation", "string"
+		attribute "BatIECDesignation", "string"
+		attribute "BatApprovedChemistry", "string"
+		attribute "BatCapacity", "number"
+		attribute "BatQuantity", "number"
+		attribute "BatChargeState", "string"
+		attribute "BatTimeToFullCharge", "number"
+		attribute "BatFunctionalWhileCharging", "string"
+		attribute "BatChargingCurrent", "string"
+		attribute "ActiveBatChargeFaults", "string"
+		attribute "EndpointList", "string"
+
     }
     preferences {
         input name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true
     }
-}
-
-void parseInChildDriver(descMap){
-    log.info "Attempting to parse unknown item in the child driver: ${device.displayName}"
-    
 }
 
 void parse(List hubitatEventMaps) {
@@ -31,7 +60,7 @@ void parse(List hubitatEventMaps) {
 }
 
 void initialize() {
-    refresh()
+    parent?.componentRefresh(this.device)
 }
 
 void refresh() {

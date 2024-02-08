@@ -10,17 +10,33 @@ metadata {
         capability "ColorTemperature"
         
         command "CleanupData"
-      
+        
+        // Identify Cluster
+        attribute "IdentifyTime", "number"
+        attribute "IdentifyType", "string"
+        
+        // Switch Cluster
+        attribute "OnTime", "number"
+        attribute "OffWaitTime", "number"
+        attribute "StartUpOnOff", "string"
+        
+        // Level Cluster
         attribute "OnOffTransitionTime", "number"
         attribute "OnTransitionTime", "number"
         attribute "OffTransitionTime", "number"
+
+        attribute "RemainingTime", "number"
+        attribute "MinLevel", "number"
+        attribute "MaxLevel", "number"
+        attribute "OnLevel", "number"
+        attribute "DefaultMoveRate", "number"
+        
+        
+        // Color Cluster
         attribute "colorCapabilities", "string"
-        attribute "colorTemperatureMin", "number"
-        attribute "colorTemperatureMax", "number"
-        attribute "identifyTimeRemaining", "number"
-        attribute "remainingTime", "number"
-        attribute "minLevel", "number"
-        attribute "maxLevel", "number"
+        attribute "ColorTemperatureMinKelvin", "number"
+        attribute "ColorTemperatureMaxKelvin", "number"
+
 		
     }
     preferences {
@@ -55,7 +71,7 @@ void parse(String description) { log.warn "parse(String description) not impleme
 void parse(List description) {
     description.each {
         if (device.hasAttribute (it.name)) {
-            log.debug "Updating using ${it}"
+            if (txtEnable && (device.currentValue(it.name) != it.value)) log.info it.descriptionText // Log if txtEnable and the value is changing
             if (updateOnlyAttributes.contains(it.name)) {
                 device.updateDataValue(it.name, "${it.value}")
             } else {

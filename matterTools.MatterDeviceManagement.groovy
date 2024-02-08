@@ -10,6 +10,66 @@ metadata {
 									
         command "readClusterAttribute", [	[name:"clusterId", type:"STRING"],
 									[name:"attributeId", type:"STRING"] ] 
+        
+// Thread Attributes    
+attribute "Channel", "number"
+attribute "RoutingRole", "string"
+attribute "NetworkName", "string"
+attribute "PanId", "number"
+attribute "ExtendedPanId", "number"
+attribute "MeshLocalPrefix", "string"
+attribute "OverrunCount", "number"
+attribute "NeighborTable", "string"
+attribute "RouteTable", "string"
+attribute "PartitionId", "number"
+attribute "Weighting", "number"
+attribute "DataVersion", "number"
+attribute "StableDataVersion", "number"
+attribute "LeaderRouterId", "number"
+        
+// WiFi Attributes
+attribute "BSSID", "string"
+attribute "SecurityType", "string"
+attribute "WiFiVersion",  "string"
+attribute "ChannelNumber", "number"
+attribute "RSSI", "number"
+attribute "BeaconLostCount", "number"
+attribute "BeaconRxCount", "number"
+attribute "PacketMulticastRxCount", "number"
+attribute "PacketMulticastTxCount", "number"
+attribute "PacketUnicastRxCount", "number"
+attribute "PacketUnicastTxCount", "number"
+attribute "CurrentMaxRate", "number"
+attribute "OverrunCount", "number"
+        
+attribute "ActiveLocale", "string"
+attribute "SupportedLocales", "string"        
+attribute "TemperatureUnit", "string"      
+
+        // Basic Cluster
+attribute "DataModelRevision", "string"
+attribute "VendorName", "string"
+attribute "VendorID", "string"
+attribute "ProductName", "string"
+attribute "ProductID", "string"
+attribute "NodeLabel",  "string"
+attribute "Location", "string"
+attribute "HardwareVersion",  "string"
+attribute "HardwareVersionString", "string"
+attribute "SoftwareVersion",   "string"
+attribute "SoftwareVersionString", "string"
+attribute "ManufacturingDate",  "string"
+attribute "PartNumber",  "string"
+attribute "ProductURL", "string"
+attribute "ProductLabel",  "string"
+attribute "SerialNumber",  "string"
+attribute "LocalConfigDisabled",  "string"
+attribute "Reachable",  "string"
+attribute "UniqueID",  "string"
+attribute "CapabilityMinima",  "string"
+attribute "ProductAppearance",  "string"
+        
+        
     }
     preferences {
         input name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true
