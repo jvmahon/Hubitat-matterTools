@@ -89,17 +89,3 @@ void off( Map params = [:] ){
         log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }   
 }
-
-void refresh_0006(Map params = [:]){
-    try { 
-        Map inputs = [ep:0xFFFF] << params
-        assert inputs.ep instanceof Integer // Default value of FFFF is wildcard meaning all endpoints!
-        String hexEP = HexUtils.integerToHexString(inputs.ep, 2) 
-        String cmd = 'he rattrs [{"ep":"0x' + hexEP + '","cluster":"0x0006","attr":"0xFFFFFFFF"}]'
-        sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
-    } catch (AssertionError e) {
-        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
-    } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
-    }       
-}
