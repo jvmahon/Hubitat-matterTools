@@ -10,6 +10,8 @@ metadata {
         capability "ColorTemperature"
         
         command "CleanupData"
+        command "clearLeftoverStates"
+        command "removeAllSettings"
         
         // Identify Cluster
         attribute "IdentifyTime", "number"
@@ -101,4 +103,17 @@ void setSaturation(saturation) { parent?.componentSetSaturation(this.device, sat
 
 void setColorTemperature(colortemperature, level, transitionTime) { parent?.componentSetColorTemperature(this.device, colortemperature, level, transitionTime) }
 
+
+void clearLeftoverStates() {
+	// Can't modify state from within state.each{}, so first collect what is unwanted, then remove in a separate unwanted.each
+	state.keySet().each{state.remove( it ) }
+}
+
+void removeAllSettings() {
+    if (logEnable) log.debug "settings before clearing: " + settings
+    // Copy keys set first to avoid any chance of concurrent modification
+    def keys = new HashSet(settings.keySet())
+    keys.each{ key -> device.removeSetting(key) }
+     if (logEnable) log.debug "settings after clearing: " + settings
+}
 

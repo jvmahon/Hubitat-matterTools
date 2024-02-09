@@ -60,13 +60,9 @@ def getStoredAttributeData(Map params = [:] ){
                 ?.get(inputs.clusterInt)
                     ?.get(inputs.attrInt)       
         
-    } catch(AssertionError e) {
-        log.error "Assertion error in function getStoredAttributeData: <pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)
-    } catch(e) {
-        log.error "Caught error in function getStoredAttributeData: <pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)
-    }
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }   
 }

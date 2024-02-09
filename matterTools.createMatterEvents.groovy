@@ -8,11 +8,9 @@ library (
         documentationLink: "https://github.com/jvmahon/Hubitat-Matter",
 		version: "0.0.1"
 )
-
 import java.lang.Math
 import groovy.transform.Field
 import groovy.json.JsonBuilder
-
 
 @Field static Map colorRGBName = [
     (0..4): 'Red',
@@ -43,7 +41,6 @@ import groovy.json.JsonBuilder
     0x0009:[],
     0x000A:[]
 ]
-
 
 // Each of the following Matter-defined Enums can be indexed by either the Hex value, or its integer equivalent
 @Field static Map IdentifyTypeEnum =   [ 0:"None",     1:"LightOutput",    2:"VisibleIndicator",    3:"AudibleBeep",    4:"Display",    5:"Actuator"] // Cluste 0x0003
@@ -107,7 +104,6 @@ import groovy.json.JsonBuilder
 
 @Field static Map RoutingRoleEnum = [0:"Unspecified", 1:"Unassigned", 2:"SleepyEndDevice", 3:"EndDevice", 4:"REED", 5:"Router", 6:"Leader"]
 
-
 @Field static Closure toInt =  { String pv -> Integer.parseInt(pv, 16)} // Hex to Integer conversion.
 @Field static Closure toBool = { String pv -> toInt(pv) ? true : false} // Hex to Integer conversion.
 @Field static Closure toLong = { String pv -> Long.parseLong(pv, 16) } // Hex to Long
@@ -116,10 +112,10 @@ import groovy.json.JsonBuilder
 
 @Field static Closure HexToLux = { String pv -> Math.pow( 10, (toInt(pv) -1) / 10000)  as Integer} // convert Matter value to illumination in lx. See Matter Cluster Spec Section 2.2.5.1
 @Field static Closure HuePercent2Name = { Integer pv -> (colorRGBName.find{ entry -> entry.key.contains(pv as Integer)}).value}
-@Field static Closure HexTempToName = {String pv -> "DummyName"}
+@Field static Closure HexTempToName = {String pv -> "Color Temperature Name Not Implemented"}
 @Field static Closure HexMiredsToKelvin =  {String pv -> 1000000 / toInt(pv) as Integer}
 @Field static Closure HexHueToName = {String pv -> HuePercent2Name( HexToPercent(pv) % 100 ) }
-
+@Field static Closure HexToTemp = { String pv -> toInt(pv) / 100 } // This needs to be modified to account for negative numbers, but the standards are unclear!
 
 /*
 For Closure values in the following structure:
@@ -216,7 +212,7 @@ dv = device value - usually the content of the event map's "value" field after p
         0x0010:[[attribute:"BatReplaceability",				value:{ pv -> BatReplaceabilityEnum.get(toInt(pv))}, descriptionText: {dn, dv ->  "${dn}: Battery Replaceability is: ${dv}"}]],
         0x0011:[[attribute:"BatPresent",                    value:{ pv -> toBool(pv) }, 						descriptionText: {dn, dv ->  "${dn}: Battery Present: ${dv}"}]],
         0x0012:[[attribute:"ActiveBatFaults",               value:{ pv -> pv }, 								descriptionText: {dn, dv ->  "${dn}: Active Battery Faults are: ${dv}"}]],
-        0x0013:[[attribute:"BatReplacementDescription",		value:{ pv -> pv }, 								descriptionText: {dn, dv ->  "${dn}: Battery Replacement Description: ${dv}"}]],
+        0x0013:[[attribute:"BatReplacementDescription",		value:{ pv -> toInt(pv) }, 								descriptionText: {dn, dv ->  "${dn}: Battery Replacement Description: ${dv}"}]],
         0x0014:[[attribute:"BatCommonDesignation",  		value:{ pv -> BatCommonDesignationEnum.get(toInt(pv))}, descriptionText: {dn, dv ->  "${dn}: Battery Common  Designation: ${dv}"}]],
         0x0015:[[attribute:"BatANSIDesignation",			value:{ pv -> pv }, 								descriptionText: {dn, dv ->  "${dn}: Battery ANSI C18 Designation: ${dv}"}]],
         0x0016:[[attribute:"BatIECDesignation",             value:{ pv -> pv }, 								descriptionText: {dn, dv ->  "${dn}: Battery IEC 60086 Designation: ${dv}"}]],
@@ -314,12 +310,15 @@ dv = device value - usually the content of the event map's "value" field after p
         0x000B:[[attribute:"CurrentMaxRate",          value:{ pv -> toLong(pv)},              descriptionText: {dn, dv ->  "${dn}: Current Max Rate is: ${dv}"}]],
         0x000C:[[attribute:"OverrunCount",            value:{ pv -> toLong(pv)},              descriptionText: {dn, dv ->  "${dn}: Overrun Count is: ${dv}"}]],
         ],
-    0x003B:[ // Generic Switch Cluster
+    0x003B:[ // Boolean State
+        0x0000:[[attribute:"StateVale",    value:{ pv -> toBool(pv)}, descriptionText: {dn, dv ->  "${dn}: Boolean State ${dv}"}],
+                [attribute:"contact",    value:{ pv -> toInt(pv) ? "closed" : "open"}, descriptionText: {dn, dv ->  "${dn}: Contact Sensor State is: ${dv}"}]], //
+        ],
+    0x0045:[ // Generic Switch Cluster
         0x0000:[[attribute:"NumberOfPositions",    value:{ pv -> toInt(pv)}, descriptionText: {dn, dv ->  "${dn}: Number of Switch Positions: ${dv}"}]], // Number of Plsitions
         0x0001:[[attribute:"CurrentPosition",      value:{ pv -> toInt(pv)}, descriptionText: {dn, dv ->  "${dn}: Current Switch Position: ${dv}"}]], // Current Position
         0x0002:[[attribute:"MultiPressMax",        value:{ pv -> toInt(pv)}, descriptionText: {dn, dv ->  "${dn}: Maximum Presses for Multipress: ${dv}"}]], // Multi-Press Max
         ],
-
     0x0300:[ // Color Control Cluster.  Only covering the most common ones at the moment!
 		0x0000: [ // Hue
 			[attribute:"hue", value:{pv -> HexToPercent(pv)}, units:"%",     descriptionText:{dn, dv ->  "${dn}: Hue set to ${dv}%"}], //  This is the Hubitat name/value
@@ -353,12 +352,12 @@ dv = device value - usually the content of the event map's "value" field after p
         0x0004:[ [attribute:"LightSensorType",         value:{pv -> [0:"Photodiode", 1:"CMOS"].get(toInt(pv)) },isStateChange:false] ], 
         ],
     0x0402:[ // Temperature Measurement
-        0x0000:[ [attribute:"illuminance",              value:{pv -> toInt(pv)}, units:"C", descriptionText:{dn, dv -> "${dn}: Measured lx is ${dv}" }],
-                 [attribute:"TempMeasuredValue",        value:{pv -> toInt(pv)}, units:"C", descriptionText:{dn, dv -> "${dn}: Measured lx is ${dv}" }],
+        0x0000:[ [attribute:"temperature",              value:{pv -> HexToTemp(pv)}, units:"C", descriptionText:{dn, dv -> "${dn}: Temperature is: ${dv} C" }],
+                 [attribute:"TempMeasuredValue",        value:{pv -> HexToTemp(pv) / 100}, units:"C", descriptionText:{dn, dv -> "${dn}: Temperature is: ${dv} C" }],
                ],
-		0x0001:[ [attribute:"TempMinMeasuredValue",     value:{pv -> toInt(pv)}, units:"C", descriptionText:{dn, dv -> "${dn}: Minimum measurable lx is ${dv}"}],  	],
-        0x0002:[ [attribute:"TempMaxMeasuredValue",     value:{pv -> toInt(pv)}, units:"C", descriptionText:{dn, dv -> "${dn}: Maximum measurable lx is ${dv}"}],    	],
-        0x0003:[ [attribute:"TempTolerance", 		    value:{pv -> toInt(pv)}, units:"C", descriptionText:{dn, dv -> "${dn}: Measurement tolerance lx is ${dv}"}], 	],
+		0x0001:[ [attribute:"TempMinMeasuredValue",     value:{pv -> HexToTemp(pv) / 100}, units:"C", descriptionText:{dn, dv -> "${dn}: Minimum measurable temperature is ${dv}"}],  	],
+        0x0002:[ [attribute:"TempMaxMeasuredValue",     value:{pv -> HexToTemp(pv) / 100}, units:"C", descriptionText:{dn, dv -> "${dn}: Maximum measurable temperature is ${dv}"}],    	],
+        0x0003:[ [attribute:"TempTolerance", 		    value:{pv -> toInt(pv) / 100}, units:"C", descriptionText:{dn, dv -> "${dn}: Measurement tolerance temperature is ${dv}"}], 	],
     ],
     // 0x0403:[ // Pressure Measurement. Add if a supporting device comes to market for this!
     // 0x0404:[ // Flow Measurement. Add if a supporting device comes to market for this!
@@ -424,11 +423,11 @@ dv = device value - usually the content of the event map's "value" field after p
    ],
 ]
 
-
 List getHubitatEvents(Map descMap) {
-    List rEvents = globalAllEventsMap.get(descMap.clusterInt)
-		?.get(descMap.attrInt)
-			?.collect{ Map rValue = [:]
+    try {
+        List rEvents = globalAllEventsMap.get(descMap.clusterInt)
+		    ?.get(descMap.attrInt)
+			    ?.collect{ Map rValue = [:]
 						rValue << [name:it.attribute, value:it.value(descMap.value)] 
 						rValue << ( it.units             ? [units:(it.units)]    : [:] )
 						rValue << ( it.descriptionText   ? [descriptionText:it.descriptionText(device.displayName, rValue.value)] : [:])
@@ -440,6 +439,11 @@ List getHubitatEvents(Map descMap) {
                       String rawDataAsJSON = new JsonBuilder(descMap.value).toString() // Event is sent on Hubitat's Event stream to external devices, so let's include original data in JSON form for external device
                       rValue << ( [rawValue: rawDataAsJSON ]) 
 					}
-    return rEvents
+        return rEvents
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }     
 }
 

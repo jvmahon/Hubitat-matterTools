@@ -8,10 +8,8 @@ library (
         documentationLink: "https://github.com/jvmahon/Hubitat-Matter",
 		version: "0.0.1"
 )
-
 import groovy.transform.Field
 import  hubitat.matter.DataType
-
 
 // Matter payloads need hex parameters of greater than 2 characters to be pair-reversed.
 // This function takes a list of parameters and pair-reverses those longer than 2 characters.
@@ -20,7 +18,6 @@ import  hubitat.matter.DataType
 private String byteReverseParameters(String oneString) { byteReverseParameters([] << oneString) }
 private String byteReverseParameters(List<String> parameters) {
 	StringBuilder rStr = new StringBuilder(64)
-	
 	for (hexString in parameters) {
 		if (hexString.length() % 2) throw new Exception("In method byteReverseParameters, trying to reverse a hex string that is not an even number of characters in length. Error in Hex String: ${hexString}, All method parameters were ${parameters}.")
 		
@@ -43,14 +40,10 @@ void refreshMatter(Map params = [:]) {
         String cmd = 'he rattrs [{"ep":"' + inputs.ep  +'","cluster":"' + inputs.clusterInt    + '","attr":"' + inputs.attrInt    + '"}]'
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
     } catch (AssertionError e) {
-        log.error "<pre>${e}"
-        log.error getStackTrace(e)
-		throw(e)
-    }  catch(e) {
-        log.error "Caught error in function refreshAdvanced: <pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)
-    }
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }   
 }
 
 
@@ -66,7 +59,6 @@ void writeClusterAttribute(clusterId, attributeId, hexValue, dataType) {
 void writeClusterAttribute(Map params = [:]) {
     try {
 	    Map inputs = [ep: null, clusterInt: null , attributeInt: null , hexValue: null] << params
-        assert inputs.keySet().containsAll(params.keySet()) // checks that all user-specified parameters use permitted labels.
         assert inputs.ep instanceof Integer
         assert inputs.clusterInt instanceof Integer
         assert inputs.attributeInt instanceof Integer
@@ -76,15 +68,11 @@ void writeClusterAttribute(Map params = [:]) {
         String cmd = matter.writeAttributes(attrWriteRequests)
 
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
-    } catch(AssertionError e) {
-        log.error "<pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)   
-    } catch(e) {
-        log.error "Caught error in function writeClusterAttribute: <pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)
-    }
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }   
 }
 
 void readClusterAttribute(clusterId, attributeId) {readClusterAttribute(clusterId:clusterId, attributeId:attributeId)}
@@ -92,8 +80,8 @@ void readClusterAttribute(Map params = [:]) {
     try {
 	    Map inputs = [ep:null, clusterInt:null, attributeInt:null ] << params
         assert inputs.ep instanceof Integer
-        assert inputs.clusterInt instanceof Integer
-        assert inputs.attributeInt instanceof Integer
+        assert inputs.clusterInt instanceof Integer || instance.clusterInt instanceof Long
+        assert inputs.attributeInt instanceof Integer || instance.attributeInt instanceof Long
     
         List<Map<String, String>> attributePaths = []
         attributePaths.add(matter.attributePath(inputs.ep, inputs.clusterInt, inputs.attributeInt))
@@ -102,13 +90,9 @@ void readClusterAttribute(Map params = [:]) {
 	
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
         
-    } catch(AssertionError e) {
-        log.error "<pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)   
-    } catch(e) {
-        log.error "Caught error in function writeClusterAttribute: <pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)
-    }
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }   
 }

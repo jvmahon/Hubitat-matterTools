@@ -29,7 +29,6 @@ void identify(timeInSeconds){     identify(identifyTime:timeInSeconds as Integer
 void identify( Map params = [:] ){
     try {
         Map inputs = [ep: getEndpointIdInt(device), identifyTime: 10] << params
-        assert inputs.keySet().containsAll(["ep", "identifyTime"]) // checks that required parameters are present.
         assert inputs.identifyTime instanceof Integer
         assert inputs.ep instanceof Integer
         

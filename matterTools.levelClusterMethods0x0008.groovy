@@ -96,7 +96,6 @@ void setLevel(inputLevel, durationSeconds) {
 void setLevel( Map params = [:] ) {
     try { 
         Map inputs = [ep: null , level: null , transitionTime10ths: null ] << params
-        assert inputs.keySet().containsAll(["ep", "level", "transitionTime10ths"]) // check that all function was called with expected inputs.
         assert inputs.ep instanceof Integer  // Check that endpoint is an integer
         assert inputs.level instanceof Integer
         // Per Matter Spec, if transitionTime is null, use OnOffTransitionTime attribute value.

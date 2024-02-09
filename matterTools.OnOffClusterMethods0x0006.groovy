@@ -41,10 +41,11 @@ void on( Map params = [:] ){
        } else {
             sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x01), hubitat.device.Protocol.MATTER))  
        }
-    } catch(AssertionError e) {
-        log.error "<br><pre> ${getStackTrace(e)}"
-        log.error "<pre>${e}"
-    }    
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }     
 }
 
 //onWithTimedOff implements Matter 1.2 Cluster Spec Section 1.5.7.6, OnWithTimedOff command
@@ -66,10 +67,11 @@ void onWithTimedOff( Map params = [:] ){
         String cmd = matter.invoke(inputs.ep, 0x0006, 0x42, fields)
         if (logEnable) log.debug "${device.displayName}: Turning on with timer using parameters ${inputs}"
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
-    } catch(AssertionError e) {
-        log.error "<br><pre> ${getStackTrace(e)}"
-        log.error "<pre>${e}"
-    }   
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }     
 }
 
 void componentOff(com.hubitat.app.DeviceWrapper cd){ off(ep:getEndpointIdInt(cd)) }
@@ -78,10 +80,11 @@ void off( Map params = [:] ){
         Map inputs = [ ep:getEndpointIdInt(device) ] << params
         assert inputs.ep instanceof Integer  // Use Integer, not Hex! 
         sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x00), hubitat.device.Protocol.MATTER))
-    } catch(AssertionError e) {
-        log.error "<br><pre> ${getStackTrace(e)}"
-        log.error "<pre>${e}"
-    }
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }   
 }
 
 void refresh_0006(Map params = [:]){
@@ -91,8 +94,9 @@ void refresh_0006(Map params = [:]){
         String hexEP = HexUtils.integerToHexString(inputs.ep, 2) 
         String cmd = 'he rattrs [{"ep":"0x' + hexEP + '","cluster":"0x0006","attr":"0xFFFFFFFF"}]'
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
-    } catch(AssertionError e) {
-        log.error "<br><pre> ${getStackTrace(e)}"
-        log.error "<pre>${e}"
-    }    
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }       
 }

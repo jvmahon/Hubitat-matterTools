@@ -44,7 +44,6 @@ List<Map> getComponentDriverByEndpointType(Map params = [:] ){
     return componentDriver.get(inputs.epType)
 }
 
-
 // This next function will generally override device.getEndpointId()
 Integer getEndpointIdInt(com.hubitat.app.DeviceWrapper thisDevice) {
 	String rValue =  thisDevice?.getDataValue("endpointId") ?:   thisDevice?.endpointId 
@@ -54,7 +53,6 @@ Integer getEndpointIdInt(com.hubitat.app.DeviceWrapper thisDevice) {
     }
 	return Integer.parseInt(rValue, 16)
 }
-
 
 // Get all the child devices for a specified endpoint.
 List<com.hubitat.app.DeviceWrapper> getChildDeviceListByEndpoint( Map params = [:] ) {
@@ -125,15 +123,11 @@ void addNewChildDevice(Map params = [:]) {
         
 	    com.hubitat.app.ChildDeviceWrapper cd = addChildDevice(childDeviceDriver.namespace, childDeviceDriver.name, childDeviceNetworkID, childDeviceDriver.properties)
         
-    } catch(AssertionError e) {
-        log.error "Assertion error in function getStoredAttributeData: <pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)
-    } catch(e) {
-        log.error "Caught error in function getStoredAttributeData: <pre>${e}"
-        log.error getStackTrace(e)
-        throw(e)
-    }
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }   
 }
 
 /////////////////////////////////////////////////////////////////

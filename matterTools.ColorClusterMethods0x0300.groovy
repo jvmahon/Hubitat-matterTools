@@ -29,7 +29,6 @@ void componentSetColor(com.hubitat.app.DeviceWrapper cd, Map colormap) { setColo
 void setColor(Map params = [:]){ // UI passes a Map so trying to set defaults here doesn't work.
     try {
         Map inputs = [ep:getEndpointIdInt(device), transitionTime10ths: 0, hue: null, saturation: null, level: null] << params
-        assert inputs.keySet().containsAll(params.keySet()) // checks that all user-specified parameters use permitted labels.
         assert inputs.ep instanceof Integer
 	    assert (inputs.saturation instanceof Integer) && (inputs.saturation >= 0) && (inputs.saturation <= 100)
 	    assert (inputs.hue instanceof Integer) // Hue is degrees around a circule - don't need to range check, but mod with 100 before use!
@@ -54,7 +53,7 @@ void setColor(Map params = [:]){ // UI passes a Map so trying to set defaults he
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))  
 
         if (inputs.level) setLevel(*:inputs)
-        
+
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
@@ -68,9 +67,8 @@ void setHue(hue){ setHue(ep:getEndpointIdInt(device), hue:hue as Integer) }
 void setHue( Map params = [:] ){
     try {
         Map inputs = [ep:getEndpointIdInt(device), transitionTime10ths: 0, hue:null] << params
-        assert inputs.keySet().containsAll(["ep", "hue", "transitionTime10ths"]) // checks that all user-specified parameters use permitted labels.
         assert inputs.ep instanceof Integer 
-	    assert (inputs.hue >= 0) && (inputs.hue <= 100) // Hubitat setss hue in percent
+	    assert (inputs.hue >= 0) && (inputs.hue <= 100) // Hubitat sets hue in percent
         assert inputs.transitionTime10ths instanceof Integer
     
         Integer targetHue = Math.round(Math.max(Math.min((Integer) inputs.hue, 100), 0) * 2.54)
@@ -93,8 +91,7 @@ void setHue( Map params = [:] ){
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
         log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
-    }
-  
+    } 
 }
 
 void componentSetSaturation(com.hubitat.app.DeviceWrapper cd, saturation) {
@@ -105,7 +102,6 @@ void setSaturation(saturation){ setSaturation (ep:getEndpointIdInt(device), satu
 void setSaturation( Map params = [:] ){
     try {
         Map inputs = [ep:getEndpointIdInt(device), transitionTime10ths: 0, saturation:null ] << params
-        assert inputs.keySet().containsAll(["ep", "saturation", "transitionTime10ths"]) // checks that all user-specified parameters use permitted labels.
         assert inputs.ep instanceof Integer
 	    assert (inputs.saturation >= 0) && (inputs.saturation <= 100) // hubitat specifies saturation in percent
         assert (inputs.transitionTime10ths instanceof Integer)
@@ -130,8 +126,7 @@ void setSaturation( Map params = [:] ){
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
         log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
-    }
-   		
+    } 		
 }
 
 
@@ -146,7 +141,6 @@ void setColorTemperature(colortemperature, level = null, transitionTime = null) 
 void setColorTemperature( Map params = [:] ){
     try {
         Map inputs = [ep: null, colortemperature:null, level:null, transitionTime10ths: null] << params
-        assert inputs.keySet().containsAll(["ep", "colortemperature", "transitionTime10ths"] )  // check that function was called with required inputs.
         assert inputs.ep instanceof Integer
         assert (inputs.colortemperature instanceof Integer) && (inputs.colortemperature > 15) // 15.3 is the minimum supported by Matter based on ColorTemperatureMireds Contrsint 0xFEFF. Section 3.2.11.14.
         assert inputs.level instanceof Integer || inputs.level.is(null)
@@ -172,7 +166,6 @@ void setColorTemperature( Map params = [:] ){
     } catch(e){
         log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }
-
 }    
 
 

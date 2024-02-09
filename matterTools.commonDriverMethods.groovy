@@ -6,7 +6,6 @@ updated
 configure
 initialize
 refresh
-
 */
 
 library (
@@ -41,7 +40,6 @@ void parse(List<Map> events) {
 void parse(String description) {
     Map descMap
     List<Map> hubEvents
-
     try {
         descMap = matter.parseDescriptionAsMap(description)
         descMap.put("endpointInt", (Integer.parseInt(descMap.endpoint, 16))) // supplement map with endpointId in integer form
@@ -99,7 +97,6 @@ void parse(String description) {
     } catch(e){
         log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }
-
 }
 
 void updated(){
