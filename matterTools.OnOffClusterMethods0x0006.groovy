@@ -49,6 +49,9 @@ void on( Map params = [:] ){
 }
 
 //onWithTimedOff implements Matter 1.2 Cluster Spec Section 1.5.7.6, OnWithTimedOff command
+void componentOnWithTimedOff(com.hubitat.app.DeviceWrapper cd, childOnTime10ths, childOffWaitTime10ths) {
+    onWithTimedOff(ep:getEndpointIdInt(cd), onTime10ths:childOnTime10ths, offWaitTime10ths:childOffWaitTime10ths)
+}
 void onWithTimedOff( Map params = [:] ){ 
     try { 
         Map inputs = [ ep: getEndpointIdInt(device), onTime10ths: 10, offWaitTime10ths:0] << params
@@ -56,9 +59,9 @@ void onWithTimedOff( Map params = [:] ){
         assert inputs.onTime10ths instanceof Integer
         assert inputs.offWaitTime10ths instanceof Integer
 
-        String hexOnTime10ths = byteReverseParameters( HexUtils.integerToHexString(inputs.onTime10ths) )
-        String hexOffWaitTime10ths = byteReverseParameters( HexUtils.integerToHexString(inputs.offWaitTime10ths) )
-        
+        String hexOnTime10ths = byteReverseParameters( HexUtils.integerToHexString(inputs.onTime10ths, 2) )
+        String hexOffWaitTime10ths = byteReverseParameters( HexUtils.integerToHexString(inputs.offWaitTime10ths, 2) )
+
         List<Map<String, String>> fields = []
             fields.add(matter.cmdField(DataType.UINT8,  0, "00")) // OnOffControlBitmap
             fields.add(matter.cmdField(DataType.UINT16, 1, hexOnTime10ths)) // OnTime, byte swapped

@@ -25,6 +25,7 @@ import hubitat.helper.HexUtils
 
 // Implements Cluster Spec Section 1.2.7, Identify command 0x00
 // Note that identifyTime is in seconds - many Matter commands use tenths!
+void componentIdentify(com.hubitat.app.DeviceWrapper cd, timeInSeconds) { identify(ep:getEndpointIdInt(cd), identifyTime:timeInSeconds) }
 void identify(timeInSeconds){     identify(identifyTime:timeInSeconds as Integer) }
 void identify( Map params = [:] ){
     try {

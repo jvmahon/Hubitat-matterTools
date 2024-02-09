@@ -9,6 +9,9 @@ metadata {
         capability "ColorMode"
         capability "ColorTemperature"
         
+        command "OnWithTimedOff", [[name: "On Time in Seconds*", type:"NUMBER", description:"Turn on device for a specified number of seconds"], 
+                                   [name: "Guard Time in Seconds", type:"NUMBER", description:"After turning off, can't turn on for this many seconds"]]
+        
         command "CleanupData"
         command "clearLeftoverStates"
         command "removeAllSettings"
@@ -66,7 +69,6 @@ void installed() {
     refresh()
 }
 
-void refresh() { parent?.componentRefresh(this.device) }
 
 void parse(String description) { log.warn "parse(String description) not implemented" }
 
@@ -83,6 +85,11 @@ void parse(List description) {
     }
 }
 
+void refresh() { parent?.componentRefresh(this.device) }
+
+void OnWithTimedOff(timeInSeconds, guardTime = 0) {
+    parent?.componentOnWithTimedOff(this.device, (timeInSeconds * 10) as Integer, ((timeInSeconds + guardTime) * 10) as Integer)
+}
 void on() {  parent?.componentOn(this.device) }
 
 void off() { parent?.componentOff(this.device) }
