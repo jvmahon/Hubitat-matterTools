@@ -3,7 +3,7 @@ library (
         author: "jvm33",
         category: "matter",
         description: "Color Name Transform",
-        name: "getColorNames",
+        name: "getExpandedColorNames",
         namespace: "matterTools",
         documentationLink: "https://github.com/jvmahon/Hubitat-Matter",
 		version: "0.0.1"
