@@ -77,10 +77,9 @@ void setSaturation( Map params = [:] ){
 
         List<Map<String, String>> fields = []
             fields.add(matter.cmdField(DataType.UINT8,   0, hexSat)) // Saturation uint8 0-254
-            fields.add(matter.cmdField(DataType.UINT8,   1, "00")) // Direction 00 = Shortest
-            fields.add(matter.cmdField(DataType.UINT16,  2, (hexTransitionTime10ths[2..3] + hexTransitionTime10ths[0..1]) )) // TransitionTime uint16 0-65534, byte swapped
-            fields.add(matter.cmdField(DataType.UINT8, 3, "00")) // OptionMask, map8
-            fields.add(matter.cmdField(DataType.UINT8, 4, "00"))  // OptionsOverride, map8
+            fields.add(matter.cmdField(DataType.UINT16,  1, (hexTransitionTime10ths[2..3] + hexTransitionTime10ths[0..1]) )) // TransitionTime uint16 0-65534, byte swapped
+            fields.add(matter.cmdField(DataType.UINT8, 2, "00")) // OptionMask, map8
+            fields.add(matter.cmdField(DataType.UINT8, 3, "00"))  // OptionsOverride, map8
         String cmd = matter.invoke(inputs.ep, 0x0300, 0x03, fields) // Move To Saturation Command is 0x03. Matter Spec. Section 3.2.11.4
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))  
     
@@ -172,5 +171,3 @@ void setColorTemperature( Map params = [:] ){
         log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }
 }    
-
-
