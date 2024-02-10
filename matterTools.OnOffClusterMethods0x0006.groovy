@@ -2,7 +2,6 @@
 Reference: Matter Application Cluster Specification Version 1.2 ("Matter Cluster Spec"), Section 1.5 "On/Off Cluster"
 Dependencies: Need to import the following
     matterTools.endpointAndChildDeviceTools   // needed for getEndpointIdInt() function
-    matterTools.matterHelperUtilities         // needed for byteReverseParameters
 
 Library also assumes that descMap also includes the endpoint as an integer (descMap.endpointIdInt). 
 This isn't part of the standard "descMap" parsing, but descMap can be augmented immediately after the parseDescriptionAsMap using
@@ -59,13 +58,13 @@ void onWithTimedOff( Map params = [:] ){
         assert inputs.onTime10ths instanceof Integer
         assert inputs.offWaitTime10ths instanceof Integer
 
-        String hexOnTime10ths = byteReverseParameters( HexUtils.integerToHexString(inputs.onTime10ths, 2) )
-        String hexOffWaitTime10ths = byteReverseParameters( HexUtils.integerToHexString(inputs.offWaitTime10ths, 2) )
+        String hexOnTime10ths =       HexUtils.integerToHexString(inputs.onTime10ths, 2) 
+        String hexOffWaitTime10ths =  HexUtils.integerToHexString(inputs.offWaitTime10ths, 2) 
 
         List<Map<String, String>> fields = []
             fields.add(matter.cmdField(DataType.UINT8,  0, "00")) // OnOffControlBitmap
-            fields.add(matter.cmdField(DataType.UINT16, 1, hexOnTime10ths)) // OnTime, byte swapped
-            fields.add(matter.cmdField(DataType.UINT16, 2, hexOffWaitTime10ths)) // OffWaitTime - guarded wait time, byte swapped
+            fields.add(matter.cmdField(DataType.UINT16, 1, (hexOnTime10ths[2..3] + hexOnTime10ths[0..1]) )) // OnTime, byte swapped
+            fields.add(matter.cmdField(DataType.UINT16, 2, (hexOffWaitTime10ths[2..3] + hexOffWaitTime10ths[0..1]) )) // OffWaitTime - guarded wait time, byte swapped
     
         String cmd = matter.invoke(inputs.ep, 0x0006, 0x42, fields)
         if (logEnable) log.debug "${device.displayName}: Turning on with timer using parameters ${inputs}"
