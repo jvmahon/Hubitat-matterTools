@@ -11,7 +11,9 @@ metadata {
         
         command "OnWithTimedOff", [[name: "On Time in Seconds*", type:"NUMBER", description:"Turn on device for a specified number of seconds"], 
                                    [name: "Guard Time in Seconds", type:"NUMBER", description:"After turning off, can't turn on for this many seconds"]]
+        command "toggleOnOff" 
         
+        // Debugging Commands
         command "CleanupData"
         command "clearLeftoverStates"
         command "removeAllSettings"
@@ -89,6 +91,10 @@ void refresh() { parent?.componentRefresh(this.device) }
 
 void OnWithTimedOff(timeInSeconds, guardTime = 0) {
     parent?.componentOnWithTimedOff(this.device, (timeInSeconds * 10) as Integer, ((timeInSeconds + guardTime) * 10) as Integer)
+}
+
+void toggleOnOff() {
+    parent?.componentToggleOnOff(this.device)
 }
 void on() {  parent?.componentOn(this.device) }
 

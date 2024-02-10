@@ -27,7 +27,23 @@ Boolean supportsOffTimer(){
     if (logEnable) log.debug "supportsOffTime function not fully implemented in matterTools.OnOffCluster0x0006. Defaults to 'true' as this is Mandatory in Lighting device types"
     return true
 }
-    
+ 
+
+// off implements Matter 1.2 Cluster Spec Section 1.5.7.1, Off command
+void componentOff(com.hubitat.app.DeviceWrapper cd){ off(ep:getEndpointIdInt(cd)) }
+void off( Map params = [:] ){
+    try { 
+        Map inputs = [ ep:getEndpointIdInt(device) ] << params
+        assert inputs.ep instanceof Integer  // Use Integer, not Hex! 
+        sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x00), hubitat.device.Protocol.MATTER))
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }   
+}
+
+// on implements Matter 1.2 Cluster Spec Section 1.5.7.2, On command
 void componentOn(com.hubitat.app.DeviceWrapper cd){ on( ep:getEndpointIdInt(cd)) }
 void on( Map params = [:] ){
     try { 
@@ -40,6 +56,20 @@ void on( Map params = [:] ){
        } else {
             sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x01), hubitat.device.Protocol.MATTER))  
        }
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }     
+}
+
+// toggleOnOff implements Matter 1.2 Cluster Spec Section 1.5.7.3, Toggle command
+void componentToggleOnOff(com.hubitat.app.DeviceWrapper cd){ toggleOnOff( ep:getEndpointIdInt(cd)) }
+void toggleOnOff( Map params = [:] ){
+    try { 
+        Map inputs = [ ep:getEndpointIdInt(device)] << params
+        assert inputs.ep instanceof Integer // Use Integer, not Hex!
+        sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x02), hubitat.device.Protocol.MATTER))  
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
@@ -74,33 +104,4 @@ void onWithTimedOff( Map params = [:] ){
     } catch(e){
         log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }     
-}
-
-// toggleOnOff implements Matter 1.2 Cluster Spec Section 1.5.7.3, Toggle command
-
-void componentToggleOnOff(com.hubitat.app.DeviceWrapper cd){ toggleOnOff( ep:getEndpointIdInt(cd)) }
-void toggleOnOff( Map params = [:] ){
-    try { 
-        log.debug "attempting toggle"
-        Map inputs = [ ep:getEndpointIdInt(device)] << params
-        assert inputs.ep instanceof Integer // Use Integer, not Hex!
-        sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x02), hubitat.device.Protocol.MATTER))  
-    } catch (AssertionError e) {
-        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
-    } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
-    }     
-}
-
-void componentOff(com.hubitat.app.DeviceWrapper cd){ off(ep:getEndpointIdInt(cd)) }
-void off( Map params = [:] ){
-    try { 
-        Map inputs = [ ep:getEndpointIdInt(device) ] << params
-        assert inputs.ep instanceof Integer  // Use Integer, not Hex! 
-        sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x00), hubitat.device.Protocol.MATTER))
-    } catch (AssertionError e) {
-        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
-    } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
-    }   
 }
