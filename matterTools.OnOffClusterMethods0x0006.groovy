@@ -76,6 +76,22 @@ void onWithTimedOff( Map params = [:] ){
     }     
 }
 
+// toggleOnOff implements Matter 1.2 Cluster Spec Section 1.5.7.3, Toggle command
+
+void componentToggleOnOff(com.hubitat.app.DeviceWrapper cd){ toggleOnOff( ep:getEndpointIdInt(cd)) }
+void toggleOnOff( Map params = [:] ){
+    try { 
+        log.debug "attempting toggle"
+        Map inputs = [ ep:getEndpointIdInt(device)] << params
+        assert inputs.ep instanceof Integer // Use Integer, not Hex!
+        sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x02), hubitat.device.Protocol.MATTER))  
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    }     
+}
+
 void componentOff(com.hubitat.app.DeviceWrapper cd){ off(ep:getEndpointIdInt(cd)) }
 void off( Map params = [:] ){
     try { 
