@@ -17,7 +17,7 @@ metadata {
 		capability "Initialize"
 		capability "Refresh"
         
-        command "identify", [[name: "Identify", type:"NUMBER", range:"1..60", description:"Put device into Identify mode"]]
+        command "identify", [[name: "Identify", type:"NUMBER", description:"Put device into Identify mode"]]
         command "recreateChildDevices" // For debugging purposes
         command "createEveMotionChildDevices" // For debugging purposes
 
@@ -32,7 +32,8 @@ metadata {
         input(name:"txtEnable", type:"bool", title:"<b>Enable descriptionText logging</b>", defaultValue:true)
         input name: 'advancedOptions', type: 'bool', title: '<b>Advanced Options</b>', description: '<i>These advanced options should be already automatically set in an optimal way for your device...</i>', defaultValue: false
         if (advancedOptions == true) {
-            // input(*:checkChildDevicesOnReboot )
+            input(name:"useOnOffTimer", type:"bool", title:"Use Timer to Turn off after set time", defaultvalue:false)
+		    if (useOnOffTimer) input(name:"offTime", type:"number", title:"Turn Off After This Many Seconds:", defaultValue:300)
         }
     }
 }

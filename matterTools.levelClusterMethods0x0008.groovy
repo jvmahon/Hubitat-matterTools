@@ -44,7 +44,8 @@ void startLevelChange(Map params = [:] ){
     try { 
         Map inputs = [ep:null, direction: null, rate:50, moveWithOnOff:true] << params
         assert inputs.ep instanceof Integer  // Check that endpoint is an integer
-        assert inputs.rate instanceof Integer // rate corresponds to parameter Rate of command 1.6.7.2. Measured in units, not time (1-254 per second)
+        if (inputs.rate instanceof BigDecimal) inputs.rate = inputs.rate as Integer
+        assert inputs.rate instanceof Integer  // rate corresponds to parameter Rate of command 1.6.7.2. Measured in units, not time (1-254 per second)
         assert ["up", "down"].contains(inputs.direction)
         assert inputs.moveWithOnOff instanceof Boolean
 
@@ -95,6 +96,7 @@ void componentSetLevel(com.hubitat.app.DeviceWrapper cd, cdLevel, cdDuration = n
 		}
 }
 
+// setLevel implements Matter 1.2 Cluster Spec Section 1.6.7.6, MoveToLevelWithOnOff command 0x04
 void setLevel(inputLevel) {  setLevel(ep: getEndpointIdInt(device), level:(inputLevel as Integer) )} 
 void setLevel(inputLevel, durationSeconds) { 
     setLevel(ep: getEndpointIdInt(device), level:(inputLevel as Integer), transitionTime10ths: durationSeconds.is(null) ? (null as Integer) : (durationSeconds * 10 as Integer)) // convert time from seconds to 10ths of a second!
@@ -103,19 +105,19 @@ void setLevel( Map params = [:] ) {
     try { 
         Map inputs = [ep: null , level: null , transitionTime10ths: null ] << params
         assert inputs.ep instanceof Integer  // Check that endpoint is an integer
+        if (inputs.level instanceof BigDecimal) inputs.level = inputs.level as Integer // Web UI send BigDecimal but want Integer! Fix that.
         assert inputs.level instanceof Integer
+        inputs.level = Math.round(Math.max(Math.min(inputs.level, 100), 0)) // level is a % and must be between 0 and 100
         
         // Per Matter Spec, if transitionTime is null, use OnOffTransitionTime attribute value.
         // get that from previously retrieved data using getOnOffTransitionTime function or use 0 if that is unavailable. 
         // transitionTime is nullable. See Matter cluster spec 0008, Section 1.6.7.1, and core spec section 7.18 (Data Types),
         // so following the spec, you should be able to juse use a null value (FFFF) and not retrieve the stored value, but that doesn't work.
-        if (inputs.transitionTime10ths.is(null)) { 
-            inputs.transitionTime10ths = getOnOffTransitionTime(ep: inputs.ep) ?: 0 
-        }
+        if (inputs.transitionTime10ths.is(null)) { inputs.transitionTime10ths = getOnOffTransitionTime(ep: inputs.ep) ?: 0   }
+        if (inputs.transitionTime10ths instanceof BigDecimal) inputs.transitionTime10ths = inputs.transitionTime10ths as Integer
         assert inputs.transitionTime10ths instanceof Integer 
         
-
-        String hexLevel = HexUtils.integerToHexString((Integer) ( Math.round(Math.max(Math.min((Integer) inputs.level, 100), 0) * 2.54)), 1)
+        String hexLevel = HexUtils.integerToHexString((Integer) ( inputs.level  * 2.54), 1)
         String hexTransitionTime10ths = HexUtils.integerToHexString(inputs.transitionTime10ths, 2 ) // Time is in 10ths of a second! FFFF is the null value.
 
         List<Map<String, String>> fields = []

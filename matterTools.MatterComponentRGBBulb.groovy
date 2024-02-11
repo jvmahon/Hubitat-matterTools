@@ -9,8 +9,7 @@ metadata {
         capability "ColorMode"
         capability "ColorTemperature"
         
-        command "OnWithTimedOff", [[name: "On Time in Seconds*", type:"NUMBER", description:"Turn on device for a specified number of seconds"], 
-                                   [name: "Guard Time in Seconds", type:"NUMBER", description:"After turning off, can't turn on for this many seconds"]]
+        command "OnWithTimedOff", [[name: "On Time in Seconds*", type:"NUMBER", description:"Turn on device for a specified number of seconds"]]
         command "toggleOnOff" 
         
         // Debugging Commands
@@ -18,6 +17,7 @@ metadata {
         command "clearLeftoverStates"
         command "removeAllSettings"
         
+   
         // Identify Cluster
         attribute "IdentifyTime", "number"
         attribute "IdentifyType", "string"
@@ -43,8 +43,6 @@ metadata {
         attribute "colorCapabilities", "string"
         attribute "ColorTemperatureMinKelvin", "number"
         attribute "ColorTemperatureMaxKelvin", "number"
-
-		
     }
     preferences {
         input name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true
@@ -53,7 +51,7 @@ metadata {
 
 import groovy.transform.Field
 
-@Field static List updateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", 
+@Field static List updateLocalStateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", 
                                            "colorCapabilities","colorTemperatureMin", "colorTemperatureMax", 
                                            "minLevel", "maxLevel"]
 void CleanupData() {
@@ -71,14 +69,11 @@ void installed() {
     refresh()
 }
 
-
-void parse(String description) { log.warn "parse(String description) not implemented" }
-
 void parse(List description) {
     description.each {
         if (device.hasAttribute (it.name)) {
             if (txtEnable && (device.currentValue(it.name) != it.value)) log.info it.descriptionText // Log if txtEnable and the value is changing
-            if (updateOnlyAttributes.contains(it.name)) {
+            if (updateLocalStateOnlyAttributes.contains(it.name)) {
                 device.updateDataValue(it.name, "${it.value}")
             } else {
                 sendEvent(it)
@@ -87,15 +82,46 @@ void parse(List description) {
     }
 }
 
-void refresh() { parent?.componentRefresh(this.device) }
+void refresh() { parent?.componentRefresh(ep: getEndpoint() ) }
 
+
+Integer getEndpoint() { Integer.parseInt(getDataValue("endpointId") ) }
+                                         
+void on() {  parent?.on(ep: getEndpoint() ) }
+void off() { parent?.off(ep: getEndpoint() ) }
+void toggleOnOff() { parent?.toggleOnOff(ep: getEndpoint()) }
 void OnWithTimedOff(timeInSeconds, guardTime = 0) {
-    parent?.componentOnWithTimedOff(this.device, (timeInSeconds * 10) as Integer, ((timeInSeconds + guardTime) * 10) as Integer)
+    parent?.onWithTimedOff(ep: getEndpoint(), 
+                           onTime10ths:(timeInSeconds * 10) as Integer, 
+                           ((timeInSeconds + guardTime) * 10) as Integer)
 }
+                                         
+                                         
+void setLevel(level) { parent?.setLevel(ep: getEndpoint(), level:level) }
 
-void toggleOnOff() {
-    parent?.componentToggleOnOff(this.device)
+void setLevel(level, ramp) { parent?.setLevel(ep: getEndpoint(), level:level as Integer, transitionTime10ths:(ramp* 10) as Integer ) }
+
+void startLevelChange(direction) { parent?.startLevelChange(ep: getEndpoint(), direction:direction) }
+
+void stopLevelChange() { parent?.stopLevelChange(ep: getEndpoint()) }
+
+void setColor(colormap){  parent?.setColor(ep: getEndpoint(), 
+                                           *:colormap) }
+
+void setHue(hue) { parent?.setHue(ep: getEndpoint(), 
+                                  hue: hue as Integer) }
+
+void setSaturation(saturation) { 
+    parent?.setSaturation(ep: getEndpoint(), 
+                          saturation:saturation as Integer) }
+
+void setColorTemperature(colortemperature, level = null, transitionTime = null) { 
+    parent?.setColorTemperature(ep: getEndpoint(), 
+                                colortemperature:colortemperature, 
+                                level:level as Integer, 
+                                transitionTime10ths: (transitionTime.is(null)) ? null : (transitionTime * 10)) 
 }
+/*
 void on() {  parent?.componentOn(this.device) }
 
 void off() { parent?.componentOff(this.device) }
@@ -115,7 +141,7 @@ void setHue(hue) { parent?.componentSetHue(this.device, hue) }
 void setSaturation(saturation) { parent?.componentSetSaturation(this.device, saturation) }
 
 void setColorTemperature(colortemperature, level, transitionTime) { parent?.componentSetColorTemperature(this.device, colortemperature, level, transitionTime) }
-
+*/
 
 void clearLeftoverStates() {
 	// Can't modify state from within state.each{}, so first collect what is unwanted, then remove in a separate unwanted.each

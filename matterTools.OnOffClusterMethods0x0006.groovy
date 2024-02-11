@@ -50,8 +50,8 @@ void on( Map params = [:] ){
         Map inputs = [ ep:getEndpointIdInt(device)] << params
         assert inputs.ep instanceof Integer // Use Integer, not Hex!
         
-       if (useOnOffTimer  && supportsOffTimer()  ) { // useOnOffTime is to be set by a preference in the driver.
-           Integer timer = settings.get("offTime") as Integer
+       if (useOnOffTimer) { // useOnOffTime is to be set true or false by a preference in the driver.
+           Integer timer = settings.get("offTime") as Integer // Offtime is a number of seconds set as a preference in the driver
            onWithTimedOff(*:inputs, onTime10ths: (timer * 10))
        } else {
             sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x01), hubitat.device.Protocol.MATTER))  
@@ -86,7 +86,7 @@ void onWithTimedOff( Map params = [:] ){
         Map inputs = [ ep: getEndpointIdInt(device), onTime10ths: 10, offWaitTime10ths:0] << params
         assert inputs.ep instanceof Integer // Use Integer, not Hex! 
         assert inputs.onTime10ths instanceof Integer
-        assert inputs.offWaitTime10ths instanceof Integer
+        assert inputs.offWaitTime10ths instanceof Integer // Doesn't seem to do anything!
 
         String hexOnTime10ths =       HexUtils.integerToHexString(inputs.onTime10ths, 2) 
         String hexOffWaitTime10ths =  HexUtils.integerToHexString(inputs.offWaitTime10ths, 2) 

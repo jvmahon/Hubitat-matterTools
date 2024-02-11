@@ -33,12 +33,13 @@ void setHue( Map params = [:] ){
         // Hubitat sets hue in percent. Hue is a color wheel, so you could do a (hue % 100) and get to same place, but checking range is better way to catch errors.
         // If a developer is using raw (0..254) Matter values, or degrees 0..360, this is likely to eventuall trigger.
 	    assert (inputs.hue >= 0) && (inputs.hue <= 100) : "Hue must be expresssed as a percent 0..100 %"
+        if (inputs.transitionTime10ths instanceof BigDecimal) inputs.transitionTime10ths = inputs.transitionTime10ths as Integer // Web UI may send BigDecimal. Need Integer.
         assert inputs.transitionTime10ths instanceof Integer
         // don't need to assertion check level - it will get tested in the setLevel method!
     
-        Integer targetHue = Math.round(Math.max(Math.min((Integer) inputs.hue, 100), 0) * 2.54)
+        Integer targetHue = Math.round(Math.max(Math.min((Integer) inputs.hue, 100), 0) * 2.54) as Integer
     
-        String hexHue = HexUtils.integerToHexString(targetHue, 1) // 1 Byte
+        String hexHue =                 HexUtils.integerToHexString(targetHue, 1) // 1 Byte
         String hexTransitionTime10ths = HexUtils.integerToHexString(inputs.transitionTime10ths, 2 )
 
         List<Map<String, String>> fields = []
@@ -67,9 +68,10 @@ void setSaturation( Map params = [:] ){
         Map inputs = [ep:getEndpointIdInt(device), transitionTime10ths: 0, saturation:null, level:null ] << params
         assert inputs.ep instanceof Integer
 	    assert (inputs.saturation >= 0) && (inputs.saturation <= 100) // hubitat specifies saturation in percent
-        assert (inputs.transitionTime10ths instanceof Integer)
+        if (inputs.transitionTime10ths instanceof BigDecimal) inputs.transitionTime10ths = inputs.transitionTime10ths as Integer // Web UI may send BigDecimal. Need Integer.
+        assert inputs.transitionTime10ths instanceof Integer
         // don't need to assertion check level - it will get tested in the setLevel method!
-
+        log.debug "Setting saturation with inputs: ${inputs}"
  	    Integer targetSat = Math.round(Math.max(Math.min((Integer) inputs.saturation, 100), 0) * 2.54)
     
  	    String hexSat = HexUtils.integerToHexString(targetSat, 1) // 1 Byte
@@ -101,17 +103,15 @@ void setColor(Map params = [:]){ // UI passes a Map so trying to set defaults he
 	    assert (inputs.saturation instanceof Integer) && (inputs.saturation >= 0) && (inputs.saturation <= 100)
         // Hubitat sets hue in percent. Hue is a color wheel, so you could do a (hue % 100) and get to same place, but checking range is better way to catch errors.
         // If a developer is using raw (0..254) Matter values, or degrees 0..360, this is likely to eventuall trigger.
-	    assert (inputs.hue instanceof Integer)
+	    assert (inputs.hue instanceof Integer) && (inputs.hue >= 0) && (inputs.hue <= 100)
+        
+        if (inputs.transitionTime10ths instanceof BigDecimal) inputs.transitionTime10ths = inputs.transitionTime10ths as Integer // Web UI may send BigDecimal. Need Integer.
         assert inputs.transitionTime10ths instanceof Integer
          // don't need to assertion check level - it will get tested in the setLevel method!
-                                                                                     
-        inputs.hue = inputs.hue %100
-        Integer targetHue = Math.round(inputs.hue * 2.54) // Hue is a color wheel so values > 100 are not an error, but should be 'modulus'-ed to 0-99
- 	    Integer targetSat = Math.round(Math.max(Math.min((Integer) inputs.saturation, 100), 0) * 2.54)
     
-        String hexHue = HexUtils.integerToHexString(targetHue, 1) // 1 Byte
- 	    String hexSat = HexUtils.integerToHexString(targetSat, 1) // 1 Byte
-        String hexTransitionTime10ths = HexUtils.integerToHexString(inputs.transitionTime10ths, 2 )
+        String hexHue =                 HexUtils.integerToHexString( (Integer) Math.round(inputs.hue * 2.54) ,  1) // 1 Byte
+ 	    String hexSat =                 HexUtils.integerToHexString( (Integer) Math.round(inputs.saturation * 2.54),  1) // 1 Byte
+        String hexTransitionTime10ths = HexUtils.integerToHexString( inputs.transitionTime10ths,  2 )
 
         List<Map<String, String>> fields = []
             fields.add(matter.cmdField(DataType.UINT8,   0, hexHue)) // Hue uint8 0-254
@@ -145,15 +145,18 @@ void setColorTemperature( Map params = [:] ){
         Map inputs = [ep: null, colortemperature:null, transitionTime10ths: null, level:null] << params
         assert inputs.ep instanceof Integer
         // For color Temperature, 15.3 Kelvin is the minimum supported by Matter based on ColorTemperatureMireds accepted range 0xFEFF. MMatter Spec. Section 3.2.11.14.
+        if (inputs.colortemperature instanceof BigDecimal) inputs.colortemperature = inputs.colortemperature as Integer // Web UI may send BigDecimal. Need Integer.
         assert (inputs.colortemperature instanceof Integer) && (inputs.colortemperature > 15) 
+        if (inputs.level instanceof BigDecimal) inputs.level = inputs.level as Integer // Web UI may send BigDecimal. Need Integer.
         assert inputs.level instanceof Integer || inputs.level.is(null)
+        if (inputs.transitionTime10ths instanceof BigDecimal) inputs.transitionTime10ths = inputs.transitionTime10ths as Integer // Web UI may send BigDecimal. Need Integer.
         assert inputs.transitionTime10ths instanceof Integer || inputs.transitionTime10ths.is(null)  
         // don't need to assertion check level - it will get tested in the setLevel method!
    
         Integer targetMireds = (1000000 / inputs.colortemperature) // Matter works in Mireds, Hubitat in Kelvin. Convert Hubitat input from Kelvin to Mireds
     
- 	    String hexMireds =                 HexUtils.integerToHexString(targetMireds, 2) //
-        String hexTransitionTime10ths =    HexUtils.integerToHexString( (inputs.transitionTime10ths ?: 0), 2 ) // If not stated, use 0
+ 	    String hexMireds =                 HexUtils.integerToHexString( targetMireds,  2 ) //
+        String hexTransitionTime10ths =    HexUtils.integerToHexString( (inputs.transitionTime10ths ?: 0),  2 ) // If transitionTime10ths not stated, use 0
 
         List<Map<String, String>> fields = []
             fields.add(matter.cmdField(DataType.UINT16, 0, (hexMireds[2..3] + hexMireds[0..1]) )) // ColorTemperatureMireds
@@ -171,3 +174,5 @@ void setColorTemperature( Map params = [:] ){
         log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }
 }    
+
+
