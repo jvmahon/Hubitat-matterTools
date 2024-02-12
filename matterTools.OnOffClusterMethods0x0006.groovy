@@ -49,13 +49,9 @@ void on( Map params = [:] ){
     try { 
         Map inputs = [ ep:getEndpointIdInt(device)] << params
         assert inputs.ep instanceof Integer // Use Integer, not Hex!
-        
-       if (useOnOffTimer) { // useOnOffTime is to be set true or false by a preference in the driver.
-           Integer timer = settings.get("offTime") as Integer // Offtime is a number of seconds set as a preference in the driver
-           onWithTimedOff(*:inputs, onTime10ths: (timer * 10))
-       } else {
-            sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x01), hubitat.device.Protocol.MATTER))  
-       }
+
+        sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x01), hubitat.device.Protocol.MATTER))  
+
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){

@@ -30,11 +30,6 @@ metadata {
     preferences {
         input(name:"logEnable", type:"bool", title:"<b>Enable debug logging</b>", defaultValue:false)
         input(name:"txtEnable", type:"bool", title:"<b>Enable descriptionText logging</b>", defaultValue:true)
-        input name: 'advancedOptions', type: 'bool', title: '<b>Advanced Options</b>', description: '<i>These advanced options should be already automatically set in an optimal way for your device...</i>', defaultValue: false
-        if (advancedOptions == true) {
-            input(name:"useOnOffTimer", type:"bool", title:"Use Timer to Turn off after set time", defaultvalue:false)
-		    if (useOnOffTimer) input(name:"offTime", type:"number", title:"Turn Off After This Many Seconds:", defaultValue:300)
-        }
     }
 }
 

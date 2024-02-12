@@ -9,13 +9,16 @@ metadata {
         capability "ColorMode"
         capability "ColorTemperature"
         
-        command "OnWithTimedOff", [[name: "On Time in Seconds*", type:"NUMBER", description:"Turn on device for a specified number of seconds"]]
+        command "on"  , [[name: "Remain on for (seconds)", type:"NUMBER", description:"Turn off the device after the specified number of seconds"]]
+        // command "OnWithTimedOff", [[name: "On Time in Seconds*", type:"NUMBER", description:"Turn on device for a specified number of seconds"]]
         command "toggleOnOff" 
         
         // Debugging Commands
         command "CleanupData"
         command "clearLeftoverStates"
         command "removeAllSettings"
+        command "colorLoopStart"
+        command "colorLoopStop"
         
    
         // Identify Cluster
@@ -46,6 +49,10 @@ metadata {
     }
     preferences {
         input name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true
+        input name: 'advancedOptions', type: 'bool', title: '<b>Advanced Options</b>', description: '<i>These advanced options should be already automatically set in an optimal way for your device...</i>', defaultValue: false
+        input(name:"useOnOffTimer", type:"bool", title:"Use Off Timer to Turn off after set time.<br><i>(no effect if device is turned on using setLevel command)</i>", defaultvalue:false)
+        input(name:"offTime", type:"number", title:"When Off Timer is enabled, turn Off After This Many Seconds:", defaultValue:300)
+
     }
 }
 
@@ -86,8 +93,17 @@ void refresh() { parent?.componentRefresh(ep: getEndpoint() ) }
 
 
 Integer getEndpoint() { Integer.parseInt(getDataValue("endpointId") ) }
-                                         
-void on() {  parent?.on(ep: getEndpoint() ) }
+
+void colorLoopStart(){
+    parent?.setColorLoop(ep: getEndpoint() ) 
+}
+void colorLoopStop(){
+    parent?.setColorLoop(ep: getEndpoint(), updateFlags:0x01, action:0x00 ) 
+}
+
+void on() { parent?.on(ep: getEndpoint() ) }
+void on(turnOffAfterSeconds) {   parent?.onWithTimedOff(ep: getEndpoint(), onTime10ths: (turnOffAfterSeconds * 10) as Integer) }
+
 void off() { parent?.off(ep: getEndpoint() ) }
 void toggleOnOff() { parent?.toggleOnOff(ep: getEndpoint()) }
 void OnWithTimedOff(timeInSeconds, guardTime = 0) {

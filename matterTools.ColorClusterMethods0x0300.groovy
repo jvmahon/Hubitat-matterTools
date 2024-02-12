@@ -175,4 +175,36 @@ void setColorTemperature( Map params = [:] ){
     }
 }    
 
+// Implements Matter Command ColorLoopSet command (Command 0x44), Matter 1.2 Spec, Section 3.2.11.19
 
+void setColorLoop( Map params = [:] ){
+    try {
+        Map inputs = [ep:getEndpointIdInt(device), updateFlags: 0x0F, action:0x01, direction:0x01, time:30, startHue:0 ] << params
+        assert inputs.ep instanceof Integer 
+
+    
+        String HexUpdateFlags =     HexUtils.integerToHexString(inputs.updateFlags, 1) // 1 Byte
+        String HexAction =          HexUtils.integerToHexString(inputs.action, 1) // 1 Byte
+        String HexDirection =       HexUtils.integerToHexString(inputs.direction, 1) // 1 Byte
+        String HexTime =            HexUtils.integerToHexString(inputs.time, 2) // 2 Bytes
+        String HexStartHue =        HexUtils.integerToHexString(inputs.startHue, 2) // 1 Byte
+
+        List<Map<String, String>> fields = []
+            fields.add(matter.cmdField(DataType.UINT8,   0, HexUpdateFlags)) // 
+            fields.add(matter.cmdField(DataType.UINT8,   1, HexAction)) // Direction 00 = Shortest
+            fields.add(matter.cmdField(DataType.UINT8,   2, HexDirection)) 
+            fields.add(matter.cmdField(DataType.UINT16,  3, HexTime[2..3] + HexTime[0..1] )) // Time in seconds, byte swapped
+            fields.add(matter.cmdField(DataType.UINT16,  4, HexStartHue[2..3] + HexStartHue[0..1] )) // Hue in 16 bits
+       
+            fields.add(matter.cmdField(DataType.UINT8,   5, "00")) // OptionMask, map8
+            fields.add(matter.cmdField(DataType.UINT8,   6, "00"))  // OptionsOverride, map8
+        String cmd = matter.invoke(inputs.ep, 0x0300, 0x44, fields) // Move To Hue Command is 0x00. Matter Spec. Section 3.2.11.4
+        sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))  
+    
+       
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } 
+}
