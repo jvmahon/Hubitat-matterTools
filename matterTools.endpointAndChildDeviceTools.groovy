@@ -58,7 +58,7 @@ Integer getEndpointIdInt(com.hubitat.app.DeviceWrapper thisDevice) {
 List<com.hubitat.app.DeviceWrapper> getChildDeviceListByEndpoint( Map params = [:] ) {
     Map inputs = [ep: null ] << params
     assert inputs.ep instanceof Integer
-	childDevices.findAll{ getEndpointIdInt(it) == inputs.ep } // Compare ep in integer form so you don't have to be concerned about 2 or 4 character versions
+	childDevices.findAll{ getEndpointIdInt(it) == inputs.ep }
 }
 
 // Uses a parse routine to manage sendEvent message distribution
@@ -69,7 +69,8 @@ void sendEventsToEndpointByParse(Map params = [:]) {
     assert inputs.ep instanceof Integer
 
 	List<com.hubitat.app.DeviceWrapper> targetDevices = getChildDeviceListByEndpoint(ep:(inputs.ep))
-	if ((inputs.ep == getEndpointIdInt(device)) || (inputs.ep == 0) )  { targetDevices += this }
+	// if ((inputs.ep == getEndpointIdInt(device)) || (inputs.ep == 0) )  { targetDevices += this }
+	if (inputs.ep == 0)  { targetDevices += this }
 
 	targetDevices.each { it.parse(inputs.events) }
 }

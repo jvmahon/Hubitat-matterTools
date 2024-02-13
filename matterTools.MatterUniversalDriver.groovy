@@ -22,6 +22,7 @@ metadata {
         command "createEveMotionChildDevices" // For debugging purposes
 
         command "unsubscribeAll" // For debugging purposes
+        command "resubscribeAll" // / For debugging purposes
         command "createRGBDevice" // For debugging purposes
         command "deleteAllChildDevices" // For debugging purposes
         command "showStoredAttributeData" // For debugging purposes
@@ -46,6 +47,7 @@ metadata {
 // These functions will be replaced by a routine that creates child devices based on endpoint device types.
 // Currently, there is a parse error in Hubitat on endpoint type that prevents doing so!
 void createRGBDevice(){
+    device.updateDataValue("endpointId", "0000")
     addNewChildDevice(endpointType:0x0016, ep:0)
     addNewChildDevice(endpointType:0x0105, ep:1)
 }
@@ -58,3 +60,4 @@ void createEveMotionChildDevices(){
 void update(){
     
 }
+

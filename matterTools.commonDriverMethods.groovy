@@ -68,11 +68,13 @@ void parse(String description) {
         // 0x0040 - Fixed Label
         // 0x0041 - User Label
         // 0x0046 - ICD Management
+        /*
         if ( [0x001D, 0x001E, 0x001F, 0x002C, 0x002E, 
               0x0030, 0x0031, 0x0033, 0x0034, 0x0037, 0x0038, 0x003C, 0x003E, 0x003F, 
               0x0040, 0x0041, 0x0046].contains(descMap.clusterInt) ) { 
             return
         }
+        */
         
         hubEvents = getHubitatEvents(descMap)
         if (logEnable) log.debug "Events to be sent to main and child components are: " + hubEvents
@@ -109,24 +111,24 @@ void clearStoredData() {
     state.clear()
 }
 
-void unsubscribeAll(){
-    String cmd = matter.unsubscribe()
-    if (logEnable) log.debug "Sending command to Unsubscribe for all events: " + cmd
+void resubscribeAll(){
+    if (txtEnable) log.info "Sending command to Subscribe to all events with a 1 second minimum report delay, refresh at least every 30 minutes."
+    String cmd = 'he subscribe 0x0001 0x0700 [{"ep":"0xFFFF","cluster":"0xFFFFFFFF","attr":"0xFFFFFFFF"}]'
     sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
 }
 
+void initialize(){ 
+    log.warn "${device.displaName}: Initialize currrently does nothing, but seems to be called when there is a Matter protocol error.<br> Use Configure instead to clear and seup up subscriptions"
+}
+
 void configure(){
-    String cmd = 'he subscribe 0x0001 0x0700 [{"ep":"0xFFFF","cluster":"0xFFFFFFFF","attr":"0xFFFFFFFF"}]'
-    if (logEnable) log.debug "Sending command to Subscribe for all events with a 1 second minimum time, refresh at 30 Minute maximum: " + cmd
-    sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
+    if (txtEnable) log.info "Sending command to Unsubscribe from all events: "
+    sendHubCommand(new hubitat.device.HubAction(matter.unsubscribe(), hubitat.device.Protocol.MATTER))
+    runIn(5, resubscribeAll)
 }
 
 void componentInitialize(com.hubitat.app.DeviceWrapper cd) { 
     refreshMatter(ep:getEndpointIdInt(cd)) 
-}
-void initialize(){
-    if (txtEnable) log.info "Refreshing all endpoints, all attributes: "
-    refreshMatter(ep:0xFFFF, clusterInt: 0xFFFFFFFF, attrInt: 0xFFFFFFFF)
 }
 
 void componentRefresh(com.hubitat.app.DeviceWrapper cd) { refreshMatter(ep:getEndpointIdInt(cd)) }

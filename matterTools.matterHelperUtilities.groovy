@@ -37,7 +37,9 @@ void refreshMatter(Map params = [:]) {
         assert inputs.clusterInt instanceof Integer || inputs.clusterInt instanceof Long
         assert inputs.attrInt instanceof Integer || inputs.attrInt instanceof Long
         
-        String cmd = 'he rattrs [{"ep":"' + inputs.ep  +'","cluster":"' + inputs.clusterInt    + '","attr":"' + inputs.attrInt    + '"}]'
+       // Groovy Slashy String form of a GString  https://docs.groovy-lang.org/latest/html/documentation/#_slashy_string
+        String cmd = /he rattrs [{"ep":"${inputs.ep}","cluster":"${inputs.clusterInt}","attr":"${inputs.attrInt}"}]/
+
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"

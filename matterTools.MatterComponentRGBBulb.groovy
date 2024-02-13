@@ -10,16 +10,8 @@ metadata {
         capability "ColorTemperature"
         
         command "on"  , [[name: "Remain on for (seconds)", type:"NUMBER", description:"Turn off the device after the specified number of seconds"]]
-        // command "OnWithTimedOff", [[name: "On Time in Seconds*", type:"NUMBER", description:"Turn on device for a specified number of seconds"]]
         command "toggleOnOff" 
-        
-        // Debugging Commands
-        command "CleanupData"
-        command "clearLeftoverStates"
-        command "removeAllSettings"
-        command "colorLoopStart"
-        command "colorLoopStop"
-        
+       
    
         // Identify Cluster
         attribute "IdentifyTime", "number"
@@ -49,10 +41,6 @@ metadata {
     }
     preferences {
         input name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true
-        input name: 'advancedOptions', type: 'bool', title: '<b>Advanced Options</b>', description: '<i>These advanced options should be already automatically set in an optimal way for your device...</i>', defaultValue: false
-        input(name:"useOnOffTimer", type:"bool", title:"Use Off Timer to Turn off after set time.<br><i>(no effect if device is turned on using setLevel command)</i>", defaultvalue:false)
-        input(name:"offTime", type:"number", title:"When Off Timer is enabled, turn Off After This Many Seconds:", defaultValue:300)
-
     }
 }
 
@@ -61,10 +49,7 @@ import groovy.transform.Field
 @Field static List updateLocalStateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", 
                                            "colorCapabilities","colorTemperatureMin", "colorTemperatureMax", 
                                            "minLevel", "maxLevel"]
-void CleanupData() {
-    log.info "Clearing Up state data"
-    this.state.clear()
-}
+
 void updated() {
     log.info "Updated..."
     log.warn "description logging is: ${txtEnable == true}"
@@ -79,7 +64,13 @@ void installed() {
 void parse(List description) {
     description.each {
         if (device.hasAttribute (it.name)) {
-            if (txtEnable && (device.currentValue(it.name) != it.value)) log.info it.descriptionText // Log if txtEnable and the value is changing
+            if (txtEnable) {
+                if(device.currentValue(it.name) == it.value) {
+                    log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") )+" (unchanged)" // Log if txtEnable and the value is the same
+                } else {
+                    log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") ) // Log if txtEnable and the value is the same
+                }
+            }
             if (updateLocalStateOnlyAttributes.contains(it.name)) {
                 device.updateDataValue(it.name, "${it.value}")
             } else {
@@ -89,20 +80,12 @@ void parse(List description) {
     }
 }
 
-void refresh() { parent?.componentRefresh(ep: getEndpoint() ) }
-
+void refresh() { parent?.refreshMatter(ep: getEndpoint() ) }
 
 Integer getEndpoint() { Integer.parseInt(getDataValue("endpointId") ) }
 
-void colorLoopStart(){
-    parent?.setColorLoop(ep: getEndpoint() ) 
-}
-void colorLoopStop(){
-    parent?.setColorLoop(ep: getEndpoint(), updateFlags:0x01, action:0x00 ) 
-}
-
 void on() { parent?.on(ep: getEndpoint() ) }
-void on(turnOffAfterSeconds) {   parent?.onWithTimedOff(ep: getEndpoint(), onTime10ths: (turnOffAfterSeconds * 10) as Integer) }
+void on(turnOffAfterSeconds) {   parent?.onWithTimedOff(ep:getEndpoint(), onTime10ths:(turnOffAfterSeconds * 10 as Integer) )}
 
 void off() { parent?.off(ep: getEndpoint() ) }
 void toggleOnOff() { parent?.toggleOnOff(ep: getEndpoint()) }
