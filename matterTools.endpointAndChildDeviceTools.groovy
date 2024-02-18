@@ -29,12 +29,12 @@ List<Map> getComponentDriverByEndpointType(Map params = [:] ){
         0x0103:[[namespace:"hubitat" ,     name:"Generic Component Switch",                 properties:[isComponent:false, name:null, label: null] ] ], // On/Off Light Switch
         0x0104:[[namespace:"hubitat" ,     name:"Generic Component Dimmer",                 properties:[isComponent:false, name:null, label: null] ] ], // Dimmer Switch
         0x0105:[[namespace:"hubitat" ,     name:"Generic Component RGBW",                   properties:[isComponent:false, name:null, label: null] ] ], // Color Dimmer Switch
-        0x0106:[[namespace:"matterTools" , name:"Matter Component Illuminance Sensor",      properties:[isComponent:false, name:null, label: null] ] ], // Illuminance Sensor
+        0x0106:[[namespace:"matterTools" , name:"Matter Generic Component Illuminance Sensor",      properties:[isComponent:false, name:null, label: null] ] ], // Illuminance Sensor
         0x0107:[[namespace:"hubitat" ,     name:"Generic Component Motion Sensor",          properties:[isComponent:false, name:null, label: null] ] ], // Occupancy Sensor (Motion Sensor)    
         0x010A:[[namespace:"hubitat" ,     name:"Generic Component Switch",                 properties:[isComponent:false, name:null, label: null] ] ], // On/Off Plug-In Unit
         0x010B:[[namespace:"hubitat" ,     name:"Generic Component Dimmer",                 properties:[isComponent:false, name:null, label: null] ] ], // Dimmable Plug-In
         0x010C:[[namespace:"hubitat" ,     name:"Generic Component CT",                     properties:[isComponent:false, name:null, label: null] ] ], // Color Temp Light
-        0x010D:[[namespace:"matterTools" , name:"Matter Component RGB Bulb",                properties:[isComponent:false, name:null, label: null] ],
+        0x010D:[[namespace:"matterTools" , name:"Matter Generic Component RGBW",                properties:[isComponent:false, name:null, label: null] ],
                 [namespace:"hubitat" ,     name:"Generic Component RGBW",                   properties:[isComponent:false, name:null, label: null] ]], // Extended Color Light
         0x0302:[[namespace:"hubitat" ,     name:"Generic Component Temperature Sensor",     properties:[isComponent:false, name:null, label: null] ] ], // Temperature Sensor
         0x0307:[[namespace:"hubitat" ,     name:"Generic Component Humidity Sensor",        properties:[isComponent:false, name:null, label: null] ] ], // Humidity Sensor
@@ -112,7 +112,7 @@ void addNewChildDevice(Map params = [:]) {
         List<Map> allInstalledDrivers = getInstalledDrivers()
         
         // Go through list of candidate drivers and select the first one that is also installed in Hubitat
-        Map childDeviceDriver = matterDriverCandidatesList.find{ item -> allInstalledDrivers.find{ ((it.name == item.name) && (it.namespace == item.namespace))} } 
+        Map childDeviceDriver = matterDriverCandidatesList.find{ driver -> allInstalledDrivers.find{ ((it.name == driver.name) && (it.namespace == driver.namespace))} } 
         
         assert !childDeviceDriver.is(null) : "Unable to find a suitable child device driver candidate."
         

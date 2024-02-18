@@ -1,21 +1,24 @@
 import groovy.transform.Field
-import  hubitat.matter.DataType
+import hubitat.matter.DataType
 
+#include matterTools.matterEnumTypes
 #include matterTools.endpointAndChildDeviceTools // Tools for creation of child devices
 #include matterTools.identifyClusterMethods0x0003 // Identify methods supporting named parameters, endpoints, and child devices
 #include matterTools.OnOffClusterMethods0x0006 // On/Off cluster methods supporting named parameters, endpoints, and child devices
 #include matterTools.levelClusterMethods0x0008 // Level cluster methods supporting named parameters, endpoints, and child devices
 #include matterTools.ColorClusterMethods0x0300 // Color Cluster methods supporting named parameters, endpoints, and child devices
-#include matterTools.createMatterEvents // Converts the data from parseAsMap to Hubitat event form
+#include matterTools.createListOfMatterSendEventMaps // Converts the data from parseAsMap to Hubitat event form
 #include matterTools.commonDriverMethods // Main body of the driver, including parse handling and event distribution
 #include matterTools.matterHelperUtilities
 #include matterTools.concurrentRuntimeDataStorage
 
 metadata {
-    definition (name: "Matter Universal Driver", namespace: "matterTools", author: "James Mahon") {
+    definition (name: "Matter Universal Driver", namespace: "matterTools", author: "jvm33") {
         capability "Configuration"		
 		capability "Initialize"
 		capability "Refresh"
+        
+        command "testLimitedRefresh"
         
         command "identify", [[name: "Identify", type:"NUMBER", description:"Put device into Identify mode"]]
         command "recreateChildDevices" // For debugging purposes
@@ -25,15 +28,22 @@ metadata {
         command "resubscribeAll" // / For debugging purposes
         command "createRGBDevice" // For debugging purposes
         command "deleteAllChildDevices" // For debugging purposes
-        command "showStoredAttributeData" // For debugging purposes
+        command "prettyPrintStoredAttributeData" // For debugging purposes
     }
     
     preferences {
         input(name:"logEnable", type:"bool", title:"<b>Enable debug logging</b>", defaultValue:false)
         input(name:"txtEnable", type:"bool", title:"<b>Enable descriptionText logging</b>", defaultValue:true)
     }
+    
+    fingerprint endpointId:"00", model:"Smart RGBTW Bulb", manufacturer:"Leedarson", controllerType:"MAT"
 }
 
+void testLimitedRefresh(){
+    if (txtEnable) log.debug "Refreshing  cluster 0x0006, all attributes, on endpoint #1"
+    refreshMatter(ep:1, clusterInt:0x0006)
+    
+}
 
 @Field static final Map checkChildDevicesOnReboot = [
     name: "checkchildDevicesOnReboot",
@@ -57,7 +67,4 @@ void createEveMotionChildDevices(){
     addNewChildDevice(endpointType:0x0106, ep:2)
 }
 
-void update(){
-    
-}
 

@@ -35,7 +35,7 @@ void identify( Map params = [:] ){
         String timeStringHex = HexUtils.integerToHexString(inputs.identifyTime, 2) //  is uint16 - two byte (4 Octet) field.
                   
         List<Map<String, String>> fields = []
-       fields.add(matter.cmdField(DataType.UINT16,  0, timeStringHex[2..3] + timeStringHex[0..1] )) // IdentifyTime uint16 0-65534, byte reversed. "0A00" means 10 seconds
+       fields.add(matter.cmdField(DataType.UINT16,  0, (timeStringHex[2..3] + timeStringHex[0..1]) )) // IdentifyTime uint16 0-65534, byte reversed. "0A00" means 10 seconds
 
         String cmd = matter.invoke(inputs.ep, 0x0003, 0x0000, fields) // command 0x0000 is the identify command, it has a IdentifyTime parameter
         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))  

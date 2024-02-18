@@ -164,7 +164,7 @@ String getColorNameFromRgb(Map inputs = [:] ) {
 
 String getColorNameFromHSV(Map inputs = [:]){
     assert inputs.hue instanceof Integer && inputs.saturation instanceof Integer && inputs.level instanceof Integer
-    list rgbList = hubitat.helper.ColorUtils.hsvToRGB([inputs.hue, inputs.saturation, inputs.level])
+    List rgbList = hubitat.helper.ColorUtils.hsvToRGB([inputs.hue, inputs.saturation, inputs.level])
     Map colors = [r:(rgbList[0]), g:(rgbList[1]), b:(rgbList[2])]
     getColorNameFromRgb(colors)
 }
