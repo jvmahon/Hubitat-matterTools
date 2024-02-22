@@ -39,7 +39,7 @@ import groovy.transform.CompileStatic
 // Air Quality Cluster 0x005B Enum Data Types (Matter Cluster Spec. Section 2.9.5)
 @Field static Map AirQualityEnumType = [ 0:"Unknown",     1:"Good",    2:"Fair",    3:"Moderate",    4:"Poor",    5:"VeryPoor",    6:"ExtremelyPoor"]
 
-// Concentration Measurement Clusters (Matter Cluster Spec. Section 2.10.5)
+// Concentration Measurement Clusters 0x040C (and others) (Matter Cluster Spec. Section 2.10.5)
 @Field static Map MeasurementUnitEnum =   [0:"PPM", 1:"PPB", 2:"PPT", 3:"MGM3", 4:"UGM3", 5:"NGM3", 6:"PM3", 7:"BQM3"]
 @Field static Map MeasurementMediumEnum =  [0:"Air", 1:"Water", 2:"Soil"]
 @Field static Map LevelValueEnum =   [0:"Unknown", 1:"Low", 2:"Medium", 3:"High", 4:"Critical"]
@@ -52,20 +52,24 @@ import groovy.transform.CompileStatic
 @Field static Map EndOfServiceEnum = [0:"Normal", 1:"Expired"]
 @Field static Map ContaminationStateEnum = [0:"Normal", 1:"Low", 2:"Warning", 3:"Critical" ]
 
-// Thread Network Diagnostics Cluster  (Matter **Core** Spec. Section 11.13.5)
+// Thread Network Diagnostics Cluster 0x0035 (Matter **Core** Spec. Section 11.13.5)
 @Field static Map NetworkFaultEnum = [0:"Unspecified", 1:"LinkDown", 2:"HardwareFailure", 3:"NetworkJammed"]
 // ConnectionStatusEnum - same as WiFi
 @Field static Map RoutingRoleEnumType = [0:"Unspecified", 1:"Unassigned", 2:"SleepyEndDevice", 3:"EndDevice", 4:"REED", 5:"Router", 6:"Leader"]
 // (Many other types not included)
 
 
-// Wi-Fi NEtwork Diagnostics Cluster  (Matter **Core** Spec. Section 11.14.5)
+// Wi-Fi NEtwork Diagnostics Cluster 0x0036 (Matter **Core** Spec. Section 11.14.5)
 @Field static Map SecurityTypeEnum = [0:"Unspecified", 1:"None", 2:"WEP", 3:"WPA", 4:"WPA2", 5:"WPA3"]
 @Field static Map WiFiVersionEnum = [0:"a", 1:"b", 2:"g", 3:"n", 4:"ac", 5:"ax", 6:"ah"]
 @Field static Map AssociationFailureCauseEnum = [0:"Unknown", 1:"AssociationFailed", 2:"AuthenticationFailed", 3:"SsidNotFound"]
 @Field static Map ConnectionStatusEnum = [0:"Connected", 1:"NotConnected"]
 
-// PowerSource Cluster  (Matter **Core** Spec. Section 11.7.5)
+// Ehternet Network Diagnostics Cluster 0x0037 (Matter **Core** Spec. Section 11.15.5)
+@Field static Map PHYRateEnum = [0:"Rate10M", 1:"Rate100M", 2:"Rate1G", 3:"Rate2_5G", 4:"Rate5G", 5:"Rate10G", 6:"Rate40G", 7:"Rate100G", 8:"Rate200G", 9:"Rate400G"]
+
+
+// PowerSource Cluster 0x002F (Matter **Core** Spec. Section 11.7.5)
 @Field static Map WiredFaultEnum = [0:"Unspecified", 1:"OverVoltage", 2:"UnderVoltage"]
 @Field static Map BatFaultEnum = [0:"Unspecified", 1:"OverTemp", 2:"UnderTemp"]
 @Field static Map BatChargeFaultEnum = [

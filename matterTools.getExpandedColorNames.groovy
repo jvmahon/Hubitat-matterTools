@@ -13,14 +13,14 @@ import groovy.transform.Field
 @Field static List colorNames = [
 	[name:"Alice Blue",    		r:0xF0, g:0xF8, b:0xFF],
 	[name:"Antique White",    	r:0xFA, g:0xEB, b:0xD7],
-	[name:"Aqua",    			r:0x00, g:0xFF, b:0xFF],
+	[name:"Aqua",    			r:0x00, g:0xFF, b:0xFF], // Matter Spec 11.1.4.2
 	[name:"Aquamarine",    		r:0x7F, g:0xFF, b:0xD4],
 	[name:"Azure",    			r:0xF0, g:0xFF, b:0xFF],
 	[name:"Beige",    			r:0xF5, g:0xF5, b:0xDC],
 	[name:"Bisque",    			r:0xFF, g:0xE4, b:0xC4],
-	[name:"Black",    			r:0x00, g:0x00, b:0x00],
+	[name:"Black",    			r:0x00, g:0x00, b:0x00], // Matter Spec 11.1.4.2
 	[name:"Blanched Almond",    r:0xFF, g:0xEB, b:0xCD],
-	[name:"Blue",    			r:0x00, g:0x00, b:0xFF],
+	[name:"Blue",    			r:0x00, g:0x00, b:0xFF], // Matter Spec 11.1.4.2
 	[name:"Blue Violet",    	r:0x8A, g:0x2B, b:0xE2],
 	[name:"Brown",    			r:0xA5, g:0x2A, b:0x2A],
 	[name:"Burly Wood",    		r:0xDE, g:0xB8, b:0x87],
@@ -56,13 +56,13 @@ import groovy.transform.Field
 	[name:"Fire Brick",    		r:0xB2, g:0x22, b:0x22],
 	[name:"Floral White",    	r:0xFF, g:0xFA, b:0xF0],
 	[name:"Forest Green",    	r:0x22, g:0x8B, b:0x22],
-	[name:"Fuchsia",    		r:0xFF, g:0x00, b:0xFF],
+	[name:"Fuchsia",    		r:0xFF, g:0x00, b:0xFF], // Matter Spec 11.1.4.2
 	[name:"Gainsboro",    		r:0xDC, g:0xDC, b:0xDC],
 	[name:"Ghost White",    	r:0xF8, g:0xF8, b:0xFF],
 	[name:"Gold",    			r:0xFF, g:0xD7, b:0x00],
 	[name:"Goldenrod",    		r:0xDA, g:0xA5, b:0x20],
-	[name:"Gray",    			r:0x80, g:0x80, b:0x80],
-	[name:"Green",    			r:0x00, g:0x80, b:0x00],
+	[name:"Gray",    			r:0x80, g:0x80, b:0x80], // Matter Spec 11.1.4.2
+	[name:"Green",    			r:0x00, g:0x80, b:0x00], // Matter Spec 11.1.4.2
 	[name:"Green Yellow",    	r:0xAD, g:0xFF, b:0x2F],
 	[name:"Honey Dew",    		r:0xF0, g:0xFF, b:0xF0],
 	[name:"Hot Pink",    		r:0xFF, g:0x69, b:0xB4],
@@ -87,11 +87,11 @@ import groovy.transform.Field
 	[name:"Light SlateGray",    r:0x77, g:0x88, b:0x99],
 	[name:"Light SteelBlue",    r:0xB0, g:0xC4, b:0xDE],
 	[name:"Light Yellow",    	r:0xFF, g:0xFF, b:0xE0],
-	[name:"Lime",    			r:0x00, g:0xFF, b:0x00],
+	[name:"Lime",    			r:0x00, g:0xFF, b:0x00], // Matter Spec 11.1.4.2
 	[name:"LimeGreen",    		r:0x32, g:0xCD, b:0x32],
 	[name:"Linen",    			r:0xFA, g:0xF0, b:0xE6],
 	[name:"Magenta",    		r:0xFF, g:0x00, b:0xFF],
-	[name:"Maroon",    			r:0x80, g:0x00, b:0x00],
+	[name:"Maroon",    			r:0x80, g:0x00, b:0x00], // Matter Spec 11.1.4.2 - Error in Matter Spec. 1.2 - Purple / Maroon are set the same in the spec! Value here is correct!
 	[name:"Medium Aqua Marine", r:0x66, g:0xCD, b:0xAA],
 	[name:"Medium Blue",    	r:0x00, g:0x00, b:0xCD],
 	[name:"Medium Orchid",    	r:0xBA, g:0x55, b:0xD3],
@@ -106,9 +106,9 @@ import groovy.transform.Field
 	[name:"Misty Rose",    		r:0xFF, g:0xE4, b:0xE1],
 	[name:"Moccasin",    		r:0xFF, g:0xE4, b:0xB5],
 	[name:"Navajo White",    	r:0xFF, g:0xDE, b:0xAD],
-	[name:"Navy",    			r:0x00, g:0x00, b:0x80],
+	[name:"Navy",    			r:0x00, g:0x00, b:0x00], // Matter Spec 11.1.4.2
 	[name:"Old Lace",    		r:0xFD, g:0xF5, b:0xE6],
-	[name:"Olive",    			r:0x80, g:0x80, b:0x00],
+	[name:"Olive",    			r:0x80, g:0x80, b:0x00],  // Matter Spec 11.1.4.2
 	[name:"Olive Drab",    		r:0x6B, g:0x8E, b:0x23],
 	[name:"Orange",    			r:0xFF, g:0xA5, b:0x00],
 	[name:"Orange Red",    		r:0xFF, g:0x45, b:0x00],
@@ -123,8 +123,8 @@ import groovy.transform.Field
 	[name:"Pink",    			r:0xFF, g:0xC0, b:0xCB],
 	[name:"Plum",    			r:0xDD, g:0xA0, b:0xDD],
 	[name:"Powder Blue",    	r:0xB0, g:0xE0, b:0xE6],
-	[name:"Purple",    			r:0x80, g:0x00, b:0x80],
-	[name:"Red",    			r:0xFF, g:0x00, b:0x00],
+	[name:"Purple",    			r:0x80, g:0x00, b:0x80], // Matter Spec 11.1.4.2
+	[name:"Red",    			r:0xFF, g:0x00, b:0x00], // Matter Spec 11.1.4.2
 	[name:"Rosy Brown",    		r:0xBC, g:0x8F, b:0x8F],
 	[name:"Royal Blue",    		r:0x41, g:0x69, b:0xE1],
 	[name:"Saddle Brown",    	r:0x8B, g:0x45, b:0x13],
@@ -141,20 +141,23 @@ import groovy.transform.Field
 	[name:"Spring Green",    	r:0x00, g:0xFF, b:0x7F],
 	[name:"Steel Blue",    		r:0x46, g:0x82, b:0xB4],
 	[name:"Tan",    			r:0xD2, g:0xB4, b:0x8C],
-	[name:"Teal",    			r:0x00, g:0x80, b:0x80],
+	[name:"Teal",    			r:0x00, g:0x80, b:0x80], // Matter Spec 11.1.4.2
 	[name:"Thistle",    		r:0xD8, g:0xBF, b:0xD8],
 	[name:"Tomato",    			r:0xFF, g:0x63, b:0x47],
 	[name:"Turquoise",    		r:0x40, g:0xE0, b:0xD0],
 	[name:"Violet",    			r:0xEE, g:0x82, b:0xEE],
 	[name:"Wheat",    			r:0xF5, g:0xDE, b:0xB3],
-	[name:"White",    			r:0xFF, g:0xFF, b:0xFF],
+	[name:"White",    			r:0xFF, g:0xFF, b:0xFF], // Matter Spec 11.1.4.2
 	[name:"White Smoke",    	r:0xF5, g:0xF5, b:0xF5],
-	[name:"Yellow",    			r:0xFF, g:0xFF, b:0x00],
+	[name:"Yellow",    			r:0xFF, g:0xFF, b:0x00], // Matter Spec 11.1.4.2
 	[name:"Yellow Green",    	r:0x9A, g:0xCD, b:0x32],
 ]
 
-String getColorNameFromRgb(Map inputs = [:] ) {
+String getColorNameFromRGB(Map inputs = [:] ) {
     assert inputs.r instanceof Integer && inputs.g instanceof Integer && inputs.b instanceof Integer
+    assert inputs.r >=0 && inputs.r <=0xFF 
+    assert inputs.g >=0 && inputs.g <=0xFF
+    assert inputs.b >=0 && inputs.b <=0xFF
     // Find mininum distance to a color using next nearest neighbor calculation - don't need to do the squareroot part though
     // Geometric distance between two points in 3D space is calculated as SQRT( (X-x)**2 + (Y-y)**2 + (Z-z)**) where X,Y,Z is a first point 
     // and (x,y,z) is the second.  That concept is used to find distance between colors.
@@ -164,7 +167,9 @@ String getColorNameFromRgb(Map inputs = [:] ) {
 
 String getColorNameFromHSV(Map inputs = [:]){
     assert inputs.hue instanceof Integer && inputs.saturation instanceof Integer && inputs.level instanceof Integer
+    inputs.hue %= 100 // hue maps to degrees on a circle. Hubitat treats it as a % with each % being 3.6 degres. Values greater than 100% wrap around so Mod by 100 gets to same place
+    if (inputs.hue < 0) inputs.hue += 100 // hue maps to degrees on a circle. A negative value gets to the same place by adding 100% and treating as a positive value
     List rgbList = hubitat.helper.ColorUtils.hsvToRGB([inputs.hue, inputs.saturation, inputs.level])
     Map colors = [r:(rgbList[0]), g:(rgbList[1]), b:(rgbList[2])]
-    getColorNameFromRgb(colors)
+    getColorNameFromRGB(colors)
 }
