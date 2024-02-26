@@ -33,6 +33,8 @@ metadata {
         attribute "OnLevel", "number"
         attribute "DefaultMoveRate", "number"
         
+        command "testSetOffState"
+
         
         // Color Cluster
         attribute "colorCapabilities", "string"
@@ -40,15 +42,18 @@ metadata {
         attribute "ColorTemperatureMaxKelvin", "number"
     }
     preferences {
-        input name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true
+        input(name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true)
+        input(name: "showAdvancedOptions", type: "bool", title: "<b>Advanced Options</b>", description: '<i>Turn On, then Save Preferences to show Advanced Options configuration</i>', defaultValue: false )
+        input(name: "powerAppliedState", type: "enum", title:"<b>When Powered On State</b>", description: "<i>Set state when power is first applied to device</i>", options:[ 0:"Off", 1:"On", 2:"Toggle"])
+        
+        if (advancedOptions == true) {
+            input(name: 'autoOffTimer', type: 'bool', title: '<b>Use Automatic Off Timer</b>', defaultValue: false, required: true, description: '<i>Automatically turn Off after set time.</i>')
+            input(name:'offTime', type:'number', title:"Automatic Off Time (in seconds)", defaultValue:0)
+        }
     }
 }
 #include matterTools.getExpandedColorNames
 
-void updated() {
-    log.info "Updated..."
-    log.warn "description logging is: ${txtEnable == true}"
-}
 
 void installed() {
     log.info "Installed..."
@@ -66,6 +71,7 @@ void parse(List sendEventTypeOfEvents) {
                                            "colorCapabilities","ColorTemperatureMinKelvin", "ColorTemperatureMaxKelvin", 
                                            "MinLevel", "MaxLevel", "DefaultMoveRate", "OffWaitTime", "OnLevel", "OnTime", "StartUpOnOff"]
     sendEventTypeOfEvents.each {
+        log.debug "In RGB component driver, processing event ${it}"
         if (device.hasAttribute (it.name)) {
             if (txtEnable) {
                 if(device.currentValue(it.name) == it.value) {
@@ -80,11 +86,40 @@ void parse(List sendEventTypeOfEvents) {
                 sendEvent(it)
             }
         }
+        log.debug "Testing for attribute StartUpOnOff: ${it.name == "StartUpOnOff"}"
+        if(it.name == "StartUpOnOff") {setStartupOnOffInputControl(it)}
+        
     }
     // Always check and reset the color name after any update. 
     // In reality, only need to do it after a hue, saturation, or color temperature change, 
     // but for code simplicity, just let sendEvent handle that filtering!
     setColorName()
+}
+
+
+void testSetOffState(){
+    setStartupOnOffInputControl([name:"StartUpOnOff", value:0])
+}
+
+void setStartupOnOffInputControl(event){
+    log.debug "received event ${event}"
+    if(event.value.is(null)) {
+        device.removeSetting("powerAppliedState") 
+        return
+    } else {
+
+        String newPowerStateValue = [ 0:"Off", 1:"On", 2:"Toggle"].get(event.value as Integer)
+        log.debug "updating setting powerAppliedState to ${newPowerStateValue}"
+
+        device.updateSetting("powerAppliedState", [type:"enum", value:newPowerStateValue ])
+    }
+}
+
+
+void updated() {
+    log.info "Updated..."
+    log.warn "description logging is: ${txtEnable == true}"
+    log.info "Power state setting is: ${device.getSetting("powerAppliedState")}"
 }
 
 void setColorName(){

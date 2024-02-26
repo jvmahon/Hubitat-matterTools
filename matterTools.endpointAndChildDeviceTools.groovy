@@ -21,24 +21,25 @@ List<Map> getComponentDriverByEndpointType(Map params = [:] ){
     assert inputs.epType instanceof Integer
      // The following list can have multiple choices for each device type. Put them in ordered rank!
     Map<List<Map>> componentDriver = [
-        0x0015:[[namespace:"hubitat" ,     name:"Generic Component Contact Sensor",         properties:[isComponent:false, name:null, label: null] ] ], // Contact Sensor
-        0x0016:[[namespace:"matterTools" , name:"Matter Device Management",                 properties:[isComponent:true,  name:null, label: null] ] ], // Device Management
-        0x0076:[[namespace:"hubitat" ,     name:"Generic Component Smoke Detector",         properties:[isComponent:false, name:null, label: null] ] ], // Smoke CO Alarm
-        0x0100:[[namespace:"hubitat" ,     name:"Generic Component Switch",                 properties:[isComponent:false, name:null, label: null] ] ], // On/Off Light,
-        0x0101:[[namespace:"hubitat" ,     name:"Generic Component Dimmer",                 properties:[isComponent:false, name:null, label: null] ] ], // Dimmable Light
-        0x0103:[[namespace:"hubitat" ,     name:"Generic Component Switch",                 properties:[isComponent:false, name:null, label: null] ] ], // On/Off Light Switch
-        0x0104:[[namespace:"hubitat" ,     name:"Generic Component Dimmer",                 properties:[isComponent:false, name:null, label: null] ] ], // Dimmer Switch
-        0x0105:[[namespace:"hubitat" ,     name:"Generic Component RGBW",                   properties:[isComponent:false, name:null, label: null] ] ], // Color Dimmer Switch
-        0x0106:[[namespace:"matterTools" , name:"Matter Generic Component Illuminance Sensor",      properties:[isComponent:false, name:null, label: null] ] ], // Illuminance Sensor
-        0x0107:[[namespace:"hubitat" ,     name:"Generic Component Motion Sensor",          properties:[isComponent:false, name:null, label: null] ] ], // Occupancy Sensor (Motion Sensor)    
-        0x010A:[[namespace:"hubitat" ,     name:"Generic Component Switch",                 properties:[isComponent:false, name:null, label: null] ] ], // On/Off Plug-In Unit
-        0x010B:[[namespace:"hubitat" ,     name:"Generic Component Dimmer",                 properties:[isComponent:false, name:null, label: null] ] ], // Dimmable Plug-In
-        0x010C:[[namespace:"hubitat" ,     name:"Generic Component CT",                     properties:[isComponent:false, name:null, label: null] ] ], // Color Temp Light
-        0x010D:[[namespace:"matterTools" , name:"Matter Generic Component RGBW",                properties:[isComponent:false, name:null, label: null] ],
-                [namespace:"hubitat" ,     name:"Generic Component RGBW",                   properties:[isComponent:false, name:null, label: null] ]], // Extended Color Light
-        0x0302:[[namespace:"hubitat" ,     name:"Generic Component Temperature Sensor",     properties:[isComponent:false, name:null, label: null] ] ], // Temperature Sensor
-        0x0307:[[namespace:"hubitat" ,     name:"Generic Component Humidity Sensor",        properties:[isComponent:false, name:null, label: null] ] ], // Humidity Sensor
-        0x0850:[[namespace:"hubitat" ,     name:"Generic Component Contact Sensor",         properties:[isComponent:false, name:null, label: null] ] ], // On/Off Sensor
+        0x0015:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Contact Sensor",         properties:[isComponent:false, name:null, label: null] ] ], // Contact Sensor
+        0x0016:[[priority:1, namespace:"matterTools",  name:"Matter Device Management",                 properties:[isComponent:true,  name:null, label: null] ] ], // Device Management
+        0x0076:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Smoke Detector",         properties:[isComponent:false, name:null, label: null] ] ], // Smoke CO Alarm
+        0x0100:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Switch",                 properties:[isComponent:false, name:null, label: null] ] ], // On/Off Light,
+        0x0101:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Dimmer",                 properties:[isComponent:false, name:null, label: null] ] ], // Dimmable Light
+        0x0103:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Switch",                 properties:[isComponent:false, name:null, label: null] ] ], // On/Off Light Switch
+        0x0104:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Dimmer",                 properties:[isComponent:false, name:null, label: null] ] ], // Dimmer Switch
+        0x0105:[[priority:1, namespace:"hubitat" ,     name:"Generic Component RGBW",                   properties:[isComponent:false, name:null, label: null] ] ], // Color Dimmer Switch
+        0x0106:[[priority:1, namespace:"matterTools",  name:"Matter Generic Component Illuminance Sensor",      properties:[isComponent:false, name:null, label: null] ] ], // Illuminance Sensor
+        0x0107:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Motion Sensor",          properties:[isComponent:false, name:null, label: null] ] ], // Occupancy Sensor (Motion Sensor)    
+        0x010A:[[priority:1, namespace:"matterTools",  name:"Matter Generic Component Outlet",  properties:[isComponent:false, name:null, label: null] ] ], // On/Off Plug-In Unit
+        0x010B:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Dimmer",                 properties:[isComponent:false, name:null, label: null] ] ], // Dimmable Plug-In
+        0x010C:[[priority:1, namespace:"hubitat" ,     name:"Generic Component CT",                     properties:[isComponent:false, name:null, label: null] ] ], // Color Temp Light
+        0x010D:[[priority:1, namespace:"matterTools" , name:"Matter Generic Component RGBW",                properties:[isComponent:false, name:null, label: null] ],  // Extended Color Light
+                [priority:2, namespace:"hubitat" ,     name:"Generic Component RGBW",                   properties:[isComponent:false, name:null, label: null] ]
+               ],
+        0x0302:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Temperature Sensor",     properties:[isComponent:false, name:null, label: null] ] ], // Temperature Sensor
+        0x0307:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Humidity Sensor",        properties:[isComponent:false, name:null, label: null] ] ], // Humidity Sensor
+        0x0850:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Contact Sensor",         properties:[isComponent:false, name:null, label: null] ] ], // On/Off Sensor
     ]
  
     return componentDriver.get(inputs.epType)
@@ -111,10 +112,11 @@ void addNewChildDevice(Map params = [:]) {
       
         List<Map> allInstalledDrivers = getInstalledDrivers()
         
-        // Go through list of candidate drivers and select the first one that is also installed in Hubitat
-        Map childDeviceDriver = matterDriverCandidatesList.find{ driver -> allInstalledDrivers.find{ ((it.name == driver.name) && (it.namespace == driver.namespace))} } 
+        // Go through list of candidate drivers and select the one with the lowest priority value that is also installed in Hubitat
+        List childDeviceDriverCandidates = matterDriverCandidatesList.findAll({ driver -> allInstalledDrivers.find{ ((it.name == driver.name) && (it.namespace == driver.namespace))} })
+        Map childDeviceDriver = childDeviceDriverCandidates.min{it.priority}
         
-        assert !childDeviceDriver.is(null) : "Unable to find a suitable child device driver candidate."
+        assert !childDeviceDriver.is(null) : "Unable to find a suitable child device driver candidate using inputs ${inputs} and childDeviceDriverCandidates: ${childDeviceDriverCandidates}."
         
         log.info "Creating child device for endpoint ${inputs.ep} using driver: ${childDeviceDriver.name}"
         

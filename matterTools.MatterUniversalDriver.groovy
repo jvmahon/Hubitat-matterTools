@@ -11,6 +11,7 @@ import hubitat.matter.DataType
 #include matterTools.commonDriverMethods // Main body of the driver, including parse handling and event distribution
 #include matterTools.matterHelperUtilities
 #include matterTools.concurrentRuntimeDataStorage
+#include matterTools.advancedParseToValue
 
 metadata {
     definition (name: "Matter Universal Driver", namespace: "matterTools", author: "jvm33") {
@@ -23,6 +24,7 @@ metadata {
         command "identify", [[name: "Identify", type:"NUMBER", description:"Put device into Identify mode"]]
         command "recreateChildDevices" // For debugging purposes
         command "createEveMotionChildDevices" // For debugging purposes
+        command "createEveEnergyOutletDevice" // For debugging purposes
 
         command "unsubscribeAll" // For debugging purposes
         command "resubscribeAll" // / For debugging purposes
@@ -67,4 +69,8 @@ void createEveMotionChildDevices(){
     addNewChildDevice(endpointType:0x0106, ep:2)
 }
 
+void createEveEnergyOutletDevice(){
+    addNewChildDevice(endpointType:0x0016, ep:0)
+    addNewChildDevice(endpointType:0x010A, ep:1)
+}
 

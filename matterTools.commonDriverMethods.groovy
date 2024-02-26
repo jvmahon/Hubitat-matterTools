@@ -52,6 +52,8 @@ void parse(String description) {
     List<Map> hubEvents
     try {
         descMap = matter.parseDescriptionAsMap(description)
+
+        if(logEnable) log.debug "Parsed description:<br>${description}<br>toproduce map:<br>${descMap}"
         descMap.put("endpointInt", (Integer.parseInt(descMap.endpoint, 16))) // supplement map with endpointId in integer form
         storeRetrievedData(descMap)
         
