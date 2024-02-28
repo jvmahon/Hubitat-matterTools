@@ -48,14 +48,23 @@ void parse(List<Map> sendEventTypeOfEvents) {
 
 // This parser handles the Matter event message originating from Hubitat.
 void parse(String description) {
-    Map descMap
+    Map descMap, decodedDescMap
     List<Map> hubEvents
     try {
-        descMap = matter.parseDescriptionAsMap(description)
+        try {
+            descMap = matter.parseDescriptionAsMap(description)
+        } catch (e) {
+            log.error e
+            descMap = null 
+        }
+        decodedDescMap = parseDescriptionAsDecodedMap(description)
 
-        if(logEnable) log.debug "Parsed description:<br>${description}<br>toproduce map:<br>${descMap}"
+        log.debug "Parsed description:<br>${description}<br>toproduce map:<br>${descMap}<br>and decoded Map:<br>${decodedDescMap}"
+        if(!descMap) return 
+        
         descMap.put("endpointInt", (Integer.parseInt(descMap.endpoint, 16))) // supplement map with endpointId in integer form
         storeRetrievedData(descMap)
+
         
         // No events are generated for the following global Element attributes. They do get stored and be retrieved from data stored using storeRetrievedData
         // See Section 7.13 of Matter core specification, Version 1.2

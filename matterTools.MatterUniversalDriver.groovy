@@ -11,7 +11,7 @@ import hubitat.matter.DataType
 #include matterTools.commonDriverMethods // Main body of the driver, including parse handling and event distribution
 #include matterTools.matterHelperUtilities
 #include matterTools.concurrentRuntimeDataStorage
-#include matterTools.advancedParseToValue
+#include matterTools.parseDescriptionAsDecodedMap
 
 metadata {
     definition (name: "Matter Universal Driver", namespace: "matterTools", author: "jvm33") {
