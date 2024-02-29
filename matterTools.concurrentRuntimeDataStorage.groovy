@@ -64,10 +64,17 @@ Typical usage:
 */
 
 void storeRetrievedData(Map descMap){
+    def valueToStore
+    if (descMap.containsKey("decodedValue")) { // This is for use with my custom parser that produced fully decoded values
+        valueToStore = descMap.decodedValue
+    } else if (descMap.containsKey("value")) {
+        valueToStore = descMap.value
+    } 
+    if (valueToStore.is(null)) return // Java ConcurrentHashMaps can't store null values!
     globalDataStorage.get(device.getDeviceNetworkId(), new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1)) // Get Map for this Network ID or create a blank of one doesn't exist
         .get(descMap.endpointInt, new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1)) // Get Map for this Endpoint or create a blank of one doesn't exist
             .get(descMap.clusterInt, new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1)) // Get Map for this cluster or create a blank of one doesn't exist
-                .put(descMap.attrInt, descMap.value) // And then put the attribute value into the map for this attribute / cluster / endpoint / network ID
+                .put(descMap.attrInt, valueToStore) // And then put the attribute value into the map for this attribute / cluster / endpoint / network ID
 }
 
 // Following function retrieves the last-stored data for a particular attribute.

@@ -71,7 +71,6 @@ void parse(List sendEventTypeOfEvents) {
                                            "colorCapabilities","ColorTemperatureMinKelvin", "ColorTemperatureMaxKelvin", 
                                            "MinLevel", "MaxLevel", "DefaultMoveRate", "OffWaitTime", "OnLevel", "OnTime", "StartUpOnOff"]
     sendEventTypeOfEvents.each {
-        log.debug "In RGB component driver, processing event ${it}"
         if (device.hasAttribute (it.name)) {
             if (txtEnable) {
                 if(device.currentValue(it.name) == it.value) {
@@ -86,9 +85,7 @@ void parse(List sendEventTypeOfEvents) {
                 sendEvent(it)
             }
         }
-        log.debug "Testing for attribute StartUpOnOff: ${it.name == "StartUpOnOff"}"
-        if(it.name == "StartUpOnOff") {setStartupOnOffInputControl(it)}
-        
+        if(it.name == "StartUpOnOff") {setStartupOnOffInputControl(it)}  
     }
     // Always check and reset the color name after any update. 
     // In reality, only need to do it after a hue, saturation, or color temperature change, 
@@ -102,19 +99,14 @@ void testSetOffState(){
 }
 
 void setStartupOnOffInputControl(event){
-    log.debug "received event ${event}"
     if(event.value.is(null)) {
         device.removeSetting("powerAppliedState") 
         return
     } else {
-
         String newPowerStateValue = [ 0:"Off", 1:"On", 2:"Toggle"].get(event.value as Integer)
-        log.debug "updating setting powerAppliedState to ${newPowerStateValue}"
-
         device.updateSetting("powerAppliedState", [type:"enum", value:newPowerStateValue ])
     }
 }
-
 
 void updated() {
     log.info "Updated..."

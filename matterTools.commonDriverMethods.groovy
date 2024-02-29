@@ -51,56 +51,21 @@ void parse(String description) {
     Map descMap, decodedDescMap
     List<Map> hubEvents
     try {
-        try {
-            descMap = matter.parseDescriptionAsMap(description)
-        } catch (e) {
-            log.error e
-            descMap = null 
-        }
-        decodedDescMap = parseDescriptionAsDecodedMap(description)
+        decodedDescMap = parseDescriptionAsDecodedMap(description) // Using my custom parser!
 
-        log.debug "Parsed description:<br>${description}<br>toproduce map:<br>${descMap}<br>and decoded Map:<br>${decodedDescMap}"
-        if(!descMap) return 
-        
-        descMap.put("endpointInt", (Integer.parseInt(descMap.endpoint, 16))) // supplement map with endpointId in integer form
-        storeRetrievedData(descMap)
+        log.info "From read attribute description string:<br>${description}<br>got decoded Map:${decodedDescMap}"
+        storeRetrievedData(decodedDescMap)
 
         
         // No events are generated for the following global Element attributes. They do get stored and be retrieved from data stored using storeRetrievedData
         // See Section 7.13 of Matter core specification, Version 1.2
         if ( [0xFE, 0xFFF8, 0xFFF9, 0xFFFA, 0xFFFB, 0xFFFC, 0xFFFD].contains(descMap.attrInt) ) return 
         
-        // Following clusters are not  parsed correctly by Hubitat as of Feb. 2024, or  not needed,
-        // Note that they are still stored on receipt, so they can be used by the program if needed.
-        // 0x001D - Descriptor
-        // 0x001E - Binding
-        // 0x001F - Access Control
-        // 0x002C - Time Format Localization
-        // 0x002E - Power Surce Configuration
-        // 0x0030 - General Commissioning
-        // 0x0031 - Network Commissiioning
-        // 0x0033 - General Diagnostics
-        // 0x0034 - Software Diagnostics
-        // 0x0037 - Ethernet Network Diagnostics
-        // 0x0038 - Time Synchronization
-        // 0x003C - Administrator Commissioning
-        // 0x003E - Node Operational Credentials
-        // 0x003F - Group Key Management
-        // 0x0040 - Fixed Label
-        // 0x0041 - User Label
-        // 0x0046 - ICD Management
-        /*
-        if ( [0x001D, 0x001E, 0x001F, 0x002C, 0x002E, 
-              0x0030, 0x0031, 0x0033, 0x0034, 0x0037, 0x0038, 0x003C, 0x003E, 0x003F, 
-              0x0040, 0x0041, 0x0046].contains(descMap.clusterInt) ) { 
-            return
-        }
-        */
         
         List<Integer> ignoreTheseClusters = [0x001D, 0x001E, 0x001F, 0x002C, 0x002E, 
               0x0030, 0x0031, 0x0033, 0x0034, 0x0037, 0x0038, 0x003C, 0x003E, 0x003F, 
               0x0040, 0x0041, 0x0046]
-        if (descMap.clusterInt in ignoreTheseClusters) return
+        if (decodedDescMap.clusterInt in ignoreTheseClusters) return
         
         hubEvents = getHubitatEvents(descMap)
         if (logEnable) log.debug "Events to be sent to main and child components are: " + hubEvents
@@ -109,11 +74,11 @@ void parse(String description) {
         // Some events, like battery (Power Cluster), can be sent to each child component device regardless of original endpoint. 0x002F -> Power cluster
         List<Integer> sendEverywhereClusters = [0x002F]
         
-        if (  descMap.clusterInt  in sendEverywhereClusters ) {  // this is the "send to all regardless of endpoint" group of clusters!
+        if (  decodedDescMap.clusterInt  in sendEverywhereClusters ) {  // this is the "send to all regardless of endpoint" group of clusters!
             childDevices.each{it.parse(hubEvents) } // send to each child
             device.parse(hubEvents) // and to the parent (root) device
         } else { // other events just go to the particular endpoint they originated from!
-            if( hubEvents?.size()) sendEventsToEndpointByParse(events:hubEvents, ep:(descMap.endpointInt))
+            if( hubEvents?.size()) sendEventsToEndpointByParse(events:hubEvents, ep:(decodedDescMap.endpointInt))
         }       
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"

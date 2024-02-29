@@ -9,17 +9,15 @@ library (
 		version: "0.0.1"
 )
 
+// Per Matter Spec Appendix A.6, values greater than 0b11000 are reserved, except for 0b00011000 which is End-of-Container
 Boolean isReservedValue(Integer controlOctet){ 
-    // Per Matter Spec Appendix A.6, values greater than 0b11000 are reserved, except for 0b00011000 which is End-of-Container
     return  ( ((controlOctet & 0b00011111) >= (0b11000)) && !(controlOctet == 0b00011111))
 }
 
-String HexToString(String hexStringToDecode){
+String HexToString(String hexStr){
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    for (int i = 0; i < hexStringToDecode.length(); i += 2) {
-      String str = hexStringToDecode.substring(i, i + 2);
-      int byteVal = Integer.parseInt(str, 16);
-      baos.write(byteVal);
+    for (int i = 0; i < hexStr.length(); i += 2) {
+      baos.write(Integer.parseInt(hexStr.substring(i, i + 2), 16));
     } 
     return baos.toString()
     // return new String(baos.toByteArray() );     
@@ -31,36 +29,21 @@ Object getTagValue(StringBuilder valueString, Integer tagControl){
     Object rValue
     switch(tagControl){
         case 0b000: // 0 Octets
-            rValue = null
-            break;
+            rValue = null; break;
         case 0b001: // Context-specific, 1 octet
-            rValue = Integer.parseInt(valueString[0..1] , 16)
-            valueString.delete(0,2)
-            break
-        case 0b010: // Common Profile, 2 octets
-            rValue = valueString[0..3] // Not really sure how this should be represented. For now, using a string!
-            valueString.delete(0,4)
-            break
-        case 0b011: // Common Profile, 4 octets
-            rValue = valueString[0..7] // Not really sure how this should be represented. For now, using a string!
-            valueString.delete(0,8)
-            break
-        case 0b100: // Implicit Profile, 2 octets
-            rValue = valueString[0..3] // Not really sure how this should be represented. For now, using a string!
-            valueString.delete(0,4)
-            break
-        case 0b101: // Implicit Profile, 4 octets
-            rValue = valueString[0..7] // Not really sure how this should be represented. For now, using a string!
-            valueString.delete(0,8)
-            break
-        case 0b110: // Fully-Qualified form, 6 octets
-            rValue = valueString[0..11] // Not really sure how this should be represented. For now, using a string!
-            valueString.delete(0,12)
-            break
-        case 0b111: // Fully-Qualified form, 8 octets
-            rValue = valueString[0..15] // Not really sure how this should be represented. For now, using a string!
-            valueString.delete(0, 16)
-            break
+            rValue = Integer.parseInt(valueString[0..1] , 16); valueString.delete(0,2); break
+        case 0b010: // Common Profile, 2 octets. Not really sure how this should be represented. For now, using a string!
+            rValue = valueString[0..3]; valueString.delete(0,4);  break
+        case 0b011: // Common Profile, 4 octets. Not really sure how this should be represented. For now, using a string!
+            rValue = valueString[0..7]; valueString.delete(0,8); break
+        case 0b100: // Implicit Profile, 2 octets. Not really sure how this should be represented. For now, using a string!
+            rValue = valueString[0..3]; valueString.delete(0,4); break
+        case 0b101: // Implicit Profile, 4 octets. Not really sure how this should be represented. For now, using a string!
+            rValue = valueString[0..7]; valueString.delete(0,8); break
+        case 0b110: // Fully-Qualified form, 6 octets. Not really sure how this should be represented. For now, using a string!
+            rValue = valueString[0..11];  valueString.delete(0,12); break
+        case 0b111: // Fully-Qualified form, 8 octets. Not really sure how this should be represented. For now, using a string!
+            rValue = valueString[0..15];  valueString.delete(0, 16); break
     }
     return rValue
 }
@@ -137,32 +120,36 @@ Object getElementValue(StringBuilder valueString, Integer elementType){
 			break;
 
 		case 0b01100: // UTF-8 String, 1-octet length
-			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..1]))
+			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..1]), 16)
 			valueString = valueString.delete(0, 2)
+            if (length == 0) { rValue = ""; break }
 			rValue = HexToString(valueString[0..(length*2-1)])
 			valueString = valueString.delete(0, (length*2))
 			break;                 
 		case 0b01101: // UTF-8 String, 2-octet length
-			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..3]))
+			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..3]), 16)
 			valueString = valueString.delete(0, 4)
+            if (length == 0) { rValue = ""; break }
 			rValue = HexToString(valueString[0..(length*2-1)])
 			valueString = valueString.delete(0, (length*2))
 			break;                             
 		case 0b01110: // UTF-8 String, 4-octet length
-			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..7]))
+			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..7]), 16)
 			valueString = valueString.delete(0, 8)
+            if (length == 0) { rValue = ""; break }
 			rValue = HexToString(valueString[0..(length*2-1)])
 			valueString = valueString.delete(0, (length*2))
 			break;                             
 		case 0b01111: // UTF-8 String, 8-octet length
-			Long length = Long.parseLong(byteReverseParameters(valueString[0..15]))
+			Long length = Long.parseLong(byteReverseParameters(valueString[0..15]), 16)
 			valueString = valueString.delete(0, 16)
+            if (length == 0) { rValue = ""; break }
 			rValue = HexToString(valueString[0..((int)length*2-1)])
 			valueString = valueString.delete(0, ((int)length*2))
 			break;  
 		 
 		case 0b10000: // Octet String, 1-octet length
-			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..1]))
+			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..1]), 16)
 			valueString = valueString.delete(0, 2)
 			rValue = new byte[length]
 			for(i = 0; i<length; i++) { 
@@ -171,7 +158,7 @@ Object getElementValue(StringBuilder valueString, Integer elementType){
 			valueString = valueString.delete(0, ((int)length*2))
 			break;
 		case 0b10001: // Octet String, 2-octet length
-			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..3]))
+			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..3]), 16)
 			valueString = valueString.delete(0, 4)
 			rValue = new byte[length]
 			for(i = 0; i<length; i++) { 
@@ -180,7 +167,7 @@ Object getElementValue(StringBuilder valueString, Integer elementType){
 			valueString = valueString.delete(0, ((int)length*2))
 			break;
 		case 0b10010: // Octet String, 4-octet length
-			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..7]))
+			Integer length = Integer.parseInt(byteReverseParameters(valueString[0..7]), 16)
 			valueString = valueString.delete(0, 8)
 			rValue = new byte[length]
 			for(i = 0; i<length; i++) { 
@@ -189,7 +176,7 @@ Object getElementValue(StringBuilder valueString, Integer elementType){
 			valueString = valueString.delete(0, ((int)length*2))
 			break;
 		case 0b10011: // Octet String, 8-octet length
-			Long length = Long.parseLong(byteReverseParameters(valueString[0..15]))
+			Long length = Long.parseLong(byteReverseParameters(valueString[0..15]), 16)
 			valueString = valueString.delete(0, 16)
 			rValue = new byte[length]
 			for(i = 0; i<length; i++) { 
@@ -207,21 +194,20 @@ Object getElementValue(StringBuilder valueString, Integer elementType){
 			   
 			// Now add each sub-element to the structure. Maximum 100 times through the loop!
 			for(int i = 0; (Integer.parseInt(valueString[0..1], 16) != 0b00011000) && (i<100); i++) { // IF the next Octet is not the End-Of-Container
-			// Recursively process the contents and push into the map rValue
-			rValue << parseToValue(valueString)
+			    // Recursively process the contents and push into the map rValue
+			    rValue << parseToValue(valueString)
 			}
 			valueString = valueString.delete(0,2) // Reached End-Of-Container, so trim that off!
 			if(rValue.every{it instanceof Map}){
-			 rValue = rValue.collectEntries({ it })
+			     rValue = rValue.collectEntries({ it })
 			}
 			break;
 		case 0b10110: // Array
 			rValue = []
-
 			// Now add each sub-element to the Array. Maximum 100 times through the loop!
 			for(int i = 0; (Integer.parseInt(valueString[0..1], 16) != 0b00011000) && (i<100); i++) { // IF the next Octet is not the End-Of-Container
-			// Recursively process the contents and push into the map rValue
-			rValue << parseToValue(valueString)
+			    // Recursively process the contents and push into the map rValue
+			    rValue << parseToValue(valueString)
 			}
 			valueString = valueString.delete(0,2) // Reached End-Of-Container, so trim that off!
 			break;
@@ -267,10 +253,8 @@ Object parseToValue(StringBuilder valueString) {
     Integer elementType = controlOctet & 0b00011111
     Integer tagControl  = (controlOctet & 0b11100000) >> 5
     valueString.delete(0,2) // Delete the control octet since its been convereted to tagControl and ElementType
-
     Object tag = getTagValue(valueString, tagControl)
     Object element = getElementValue(valueString, elementType)
-    
     return (tag.is(null)) ? (element) : [(tag):(element)]
 }
 
@@ -284,12 +268,13 @@ Map parseRattrDescription(description){
 
 Map parseDescriptionAsDecodedMap(description){
     try {
-        Map rValue = parseRattrDescription(description)
-        rValue.put( ("clusterInt"),  Integer.parseInt(rValue.cluster, 16) )
-        rValue.put( ("attrInt"),     Integer.parseInt(rValue.attrId, 16) )
-        rValue.put( ("endpointInt"), Integer.parseInt(rValue.endpoint, 16) )
+        Map rattrKeyValues = parseRattrDescription(description)
+        Map rValue = [:]
+        rValue.put( ("clusterInt"),  Integer.parseInt(rattrKeyValues.cluster, 16) )
+        rValue.put( ("attrInt"),     Integer.parseInt(rattrKeyValues.attrId, 16) )
+        rValue.put( ("endpointInt"), Integer.parseInt(rattrKeyValues.endpoint, 16) )
     
-        StringBuilder parseRattrString = new StringBuilder(rValue.value)
+        StringBuilder parseRattrString = new StringBuilder(rattrKeyValues.value)
         Object decodedValue = parseToValue(parseRattrString)
         rValue.put("decodedValue", decodedValue) 
         return rValue
