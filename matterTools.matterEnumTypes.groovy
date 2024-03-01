@@ -55,7 +55,7 @@ import groovy.transform.CompileStatic
 // Thread Network Diagnostics Cluster 0x0035 (Matter **Core** Spec. Section 11.13.5)
 @Field static Map NetworkFaultEnum = [0:"Unspecified", 1:"LinkDown", 2:"HardwareFailure", 3:"NetworkJammed"]
 // ConnectionStatusEnum - same as WiFi
-@Field static Map RoutingRoleEnumType = [0:"Unspecified", 1:"Unassigned", 2:"SleepyEndDevice", 3:"EndDevice", 4:"REED", 5:"Router", 6:"Leader"]
+@Field static Map RoutingRoleEnum = [0:"Unspecified", 1:"Unassigned", 2:"SleepyEndDevice", 3:"EndDevice", 4:"REED", 5:"Router", 6:"Leader"]
 // (Many other types not included)
 
 

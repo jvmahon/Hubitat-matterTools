@@ -49,7 +49,7 @@ Object getTagValue(StringBuilder valueString, Integer tagControl){
 }
 
 // Strings are immutable in groovy, but StringBuilder strings are not. 
-// Since the valueString is changed within the function, it needs to be passed as a StringBuilder type strin
+// Since the valueString is changed within the function, it needs to be passed as a StringBuilder type string
 Object getElementValue(StringBuilder valueString, Integer elementType){
     Object rValue = null
     try {
@@ -96,8 +96,7 @@ Object getElementValue(StringBuilder valueString, Integer elementType){
 			break;
 		case 0b00111: // Unsigned Integer, 8-Octet - Need to return as an 8 Octet Long, since normal 4 Octet Integer can't fit all unsigned values!
 			assert valueString.length() >= 16 // If this fails, length is too short. Raise an assertion error!
-			rValue = Long.parseLong(byteReverseParameters(valueString[0..15]), 16) // Parse the next 8 octets
-			if (rValue & 0x8000000000000000) log.warn "Careful - in method parseToValue:getElementValue processing an unsigned long but first bit indicates negative."
+			rValue = (new BigInteger(byteReverseParameters(valueString[0..15]), 16)) // Parse the next 8 octets as BigInteger.
 			valueString = valueString.delete(0, 16) // Trim valueString to remove the octets that were just processed
 			break;
 

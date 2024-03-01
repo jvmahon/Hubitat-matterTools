@@ -342,9 +342,9 @@ dv = device value - usually the content of the event map's "value" field after p
     ],
     // Concentration Measurement Cluster (Matter Spec Section 2.10) are too complex and beyond this library
     0x130AFC01:[ // Eve Energy Custom Cluster
-        0x130A0008:[[attribute:"voltage",             valueTransform: this.&toMilli, units:"V"		]], // Probably needs to account for negatives!
-        0x130A0009:[[attribute:"amperage",            valueTransform: this.&toMilli, units:"A"		]], // Probably needs to account for negatives!
-        0x130A000A:[[attribute:"power",               valueTransform: this.&toMilli, units:"W"		]], // Probably needs to account for negatives!
+        0x130A0008:[[attribute:"voltage",             units:"V"		]], // Probably needs to account for negatives!
+        0x130A0009:[[attribute:"amperage",            units:"A"		]], // Probably needs to account for negatives!
+        0x130A000A:[[attribute:"power",               units:"W"		]], // Probably needs to account for negatives!
         0x130A000B:[[attribute:"EveWattsAccumulated", 					]], // Probably needs to account for negatives!
         0x130A000E:[[attribute:"EveWattAccumulatedControlPoint", 		]]  // Probably needs to account for negatives!
    ],
