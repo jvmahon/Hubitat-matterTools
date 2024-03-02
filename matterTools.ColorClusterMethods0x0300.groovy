@@ -71,7 +71,6 @@ void setSaturation( Map params = [:] ){
         if (inputs.transitionTime10ths instanceof BigDecimal) inputs.transitionTime10ths = inputs.transitionTime10ths as Integer // Web UI may send BigDecimal. Need Integer.
         assert inputs.transitionTime10ths instanceof Integer
         // don't need to assertion check level - it will get tested in the setLevel method!
-        log.debug "Setting saturation with inputs: ${inputs}"
  	    Integer targetSat = Math.round(Math.max(Math.min((Integer) inputs.saturation, 100), 0) * 2.54)
     
  	    String hexSat = HexUtils.integerToHexString(targetSat, 1) // 1 Byte

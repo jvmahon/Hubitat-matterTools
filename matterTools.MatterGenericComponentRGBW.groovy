@@ -68,7 +68,7 @@ void installed() {
 // and those "extra" Maps are discarded. This allows a more generic "event Map" producting method (e.g., matterTools.createListOfMatterSendEventMaps)
 void parse(List sendEventTypeOfEvents) {
      List updateLocalStateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", 
-                                           "colorCapabilities","ColorTemperatureMinKelvin", "ColorTemperatureMaxKelvin", 
+                                           "ColorCapabilities","ColorTemperatureMinKelvin", "ColorTemperatureMaxKelvin", 
                                            "MinLevel", "MaxLevel", "DefaultMoveRate", "OffWaitTime", "OnLevel", "OnTime", "StartUpOnOff"]
     sendEventTypeOfEvents.each {
         if (device.hasAttribute (it.name)) {
@@ -129,7 +129,7 @@ void setColorName(){
             break
     }
     if (device.currentValue("colorName") != color ) { 
-        if(txtEnable) log.info "{${device.displayName} set to color: ${color}"
+        if(txtEnable) log.info "${device.displayName} set to color: ${color}"
         sendEvent(name:"colorName", value:color) 
     }
 }

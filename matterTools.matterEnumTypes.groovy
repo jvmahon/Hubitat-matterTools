@@ -104,3 +104,11 @@ import groovy.transform.CompileStatic
 	31:"ZincBromide", 32:"ZincCerium",
     ]    
 @Field static Map BatChargeStateEnum = [ 0:"Unknown", 1:"IsCharging", 2:"IsAtFullCharge", 3:"IsNotCharging", 4:"IsDischarging", 5:"IsTransitioning", ]
+
+// Concentration Measurement Cluster 0x040C (Matter Spec. Section 2.10.5)
+@Field static Map MeasurementUnitEnum =   [ 0:"PPM", 1:"PPB", 2:"PPT", 3:"MGM3", 4:"UGM3", 5:"NGM3", 6:"PM3" ]
+@Field static Map MeasurementMediumEnum = [ 0:"Air", 1:"Water", 2:"Soil" ]
+@Field static Map LevelValueEnum =        [ 0:"Unknown", 1:"Low", 2:"Medium", 3:"High", 4:"Critical" ]
+
+
+
