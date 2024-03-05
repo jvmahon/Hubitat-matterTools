@@ -33,9 +33,6 @@ metadata {
         attribute "OnLevel", "number"
         attribute "DefaultMoveRate", "number"
         
-        command "testSetOffState"
-
-        
         // Color Cluster
         attribute "colorCapabilities", "string"
         attribute "ColorTemperatureMinKelvin", "number"
@@ -67,46 +64,37 @@ void installed() {
 // The List of SendEvent Maps may include event Maps that are not needed by a particular driver (as determined based on the attributes of the driver)
 // and those "extra" Maps are discarded. This allows a more generic "event Map" producting method (e.g., matterTools.createListOfMatterSendEventMaps)
 void parse(List sendEventTypeOfEvents) {
-     List updateLocalStateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", 
-                                           "ColorCapabilities","ColorTemperatureMinKelvin", "ColorTemperatureMaxKelvin", 
-                                           "MinLevel", "MaxLevel", "DefaultMoveRate", "OffWaitTime", "OnLevel", "OnTime", "StartUpOnOff"]
-    sendEventTypeOfEvents.each {
-        if (device.hasAttribute (it.name)) {
-            if (txtEnable) {
-                if(device.currentValue(it.name) == it.value) {
-                    log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") )+" (unchanged)" // Log if txtEnable and the value is the same
-                } else {
-                    log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") ) // Log if txtEnable and the value is the same
-                }
-            }
-            if (updateLocalStateOnlyAttributes.contains(it.name)) {
-                device.updateDataValue(it.name, "${it.value}")
-            } else {
-                sendEvent(it)
-            }
-        }
-        if(it.name == "StartUpOnOff") {setStartupOnOffInputControl(it)}  
-    }
-    // Always check and reset the color name after any update. 
-    // In reality, only need to do it after a hue, saturation, or color temperature change, 
-    // but for code simplicity, just let sendEvent handle that filtering!
-    setColorName()
+    try {
+		List updateLocalStateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", 
+											   "ColorCapabilities","ColorTemperatureMinKelvin", "ColorTemperatureMaxKelvin", 
+											   "MinLevel", "MaxLevel", "DefaultMoveRate", "OffWaitTime", "OnLevel", "OnTime", "StartUpOnOff", "Binding", "UserLabelList", "FixedLabelList"]
+		sendEventTypeOfEvents.each {
+			if (device.hasAttribute (it.name)) {
+				if (txtEnable) {
+					if(device.currentValue(it.name) == it.value) {
+						log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") )+" (unchanged)" // Log if txtEnable and the value is the same
+					} else {
+						log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") ) // Log if txtEnable and the value is the same
+					}
+				}
+				if (updateLocalStateOnlyAttributes.contains(it.name)) {
+					device.updateDataValue(it.name, "${it.value}")
+				} else {
+					sendEvent(it)
+				}
+			}
+		}
+		// Always check and reset the color name after any update. 
+		// In reality, only need to do it after a hue, saturation, or color temperature change, 
+		// but for code simplicity, just let sendEvent handle that filtering!
+		setColorName()
+    } catch (AssertionError e) {
+        log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } catch(e){
+        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+    } 
 }
 
-
-void testSetOffState(){
-    setStartupOnOffInputControl([name:"StartUpOnOff", value:0])
-}
-
-void setStartupOnOffInputControl(event){
-    if(event.value.is(null)) {
-        device.removeSetting("powerAppliedState") 
-        return
-    } else {
-        String newPowerStateValue = [ 0:"Off", 1:"On", 2:"Toggle"].get(event.value as Integer)
-        device.updateSetting("powerAppliedState", [type:"enum", value:newPowerStateValue ])
-    }
-}
 
 void updated() {
     log.info "Updated..."
@@ -187,4 +175,3 @@ void removeAllSettings() {
     keys.each{ key -> device.removeSetting(key) }
      if (logEnable) log.debug "settings after clearing: " + settings
 }
-

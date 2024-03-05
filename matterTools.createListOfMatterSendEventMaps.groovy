@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils
 @Field static Closure toMilli =  { it / 1000}    // Hex to .001 conversion.
 @Field static Closure HexToPercent = { (it / 2.54) as Integer}
 @Field static Closure HexToLux =          { Math.pow( 10, (it - 1) / 10000)  as Integer} // convert Matter value to illumination in lx. See Matter Cluster Spec Section 2.2.5.1
-@Field static Closure MiredsToKelvin = { (1000000 / it) as Integer}
+@Field static Closure MiredsToKelvin = { ( (it > 0) ? (1000000 / it) : null ) as Integer}
 
 /*
 For Closure values in the following structure:
@@ -69,6 +69,9 @@ dv = device value - usually the content of the event map's "value" field after p
         0x0002:[[attribute:"ClientList",		]],
         0x0003:[[attribute:"PartsList",			]],
         0x0004:[[attribute:"TagList",			]],
+        ],
+    0x001E:[
+        0x0000:[[attribute:"Binding",	]],
         ],
     0x0028:[ // Basic Information
         0x0000:[[attribute:"DataModelRevision",		]],
@@ -222,6 +225,12 @@ dv = device value - usually the content of the event map's "value" field after p
         0x0000:[[attribute:"StateVale",     ],
                 [attribute:"contact",    valueTransform: { it ? "closed" : "open"} ]], //
         ],
+    0x0040:[ // Fixed Label Cluster, Core Spec 9.8
+        0x0000:[[attribute:"FixedLabelList",    		]], // Note attribute name change to prevent confusion between 0x0040 and 0x0041
+        ],
+    0x0041:[ // Fixed Label Cluster, Core Spec 9.9
+        0x0000:[[attribute:"UserLabelList",    		]], // Note attribute name change to prevent confusion between 0x0040 and 0x0041
+        ],
     0x0045:[ // Generic Switch Cluster
         0x0000:[[attribute:"NumberOfPositions",    		]],
         0x0001:[[attribute:"CurrentPosition",      		]],
@@ -256,6 +265,50 @@ dv = device value - usually the content of the event map's "value" field after p
                 [attribute:"ColorMode",                  	] // This is how Matter names it!
                ],
         0x000F:[[attribute:"Options",                    ]],
+        
+        0x0010:[[attribute:"NumberOfPrimaries",                  ]],
+        
+        0x0011:[[attribute:"Primary1X",                  ]],
+        0x0012:[[attribute:"Primary1Y",         ]],
+        0x0013:[[attribute:"Primary1Intensity",          ]],   
+        
+        0x0015:[[attribute:"Primary2X",                    ]],
+        0x0016:[[attribute:"Primary2Y",          ]],
+        0x0017:[[attribute:"Primary2Intensity",            ]],
+        
+        0x0019:[[attribute:"Primary3X",         ]],
+        0x001A:[[attribute:"Primary3Y",              ]],
+        0x001B:[[attribute:"Primary3Intensity",  ]],
+  
+        0x0020:[[attribute:"Primary4X",                  ]],
+        0x0021:[[attribute:"Primary4Y",         ]],
+        0x0022:[[attribute:"Primary4Intensity",          ]], 
+        
+        0x0024:[[attribute:"Primary5X",                    ]],
+        0x0025:[[attribute:"Primary5Y",          ]],
+        0x0026:[[attribute:"Primary5Intensity",            ]],
+        
+        0x0028:[[attribute:"Primary6X",         ]],
+        0x0029:[[attribute:"Primary6Y",              ]],
+        0x002A:[[attribute:"Primary6Intensity",  ]],  
+        
+        0x0020:[[attribute:"WhitePointX",                  ]],
+        0x0021:[[attribute:"WhitePointY",         ]],
+        
+        0x0030:[[attribute:"ColorPointRX",          ]],       
+        0x0031:[[attribute:"ColorPointRY",                    ]],
+        0x0032:[[attribute:"ColorPointRIntensity",          ]],
+        
+        0x0033:[[attribute:"ColorPointGX",            ]],
+        0x0034:[[attribute:"ColorPointGY",         ]],
+        0x0036:[[attribute:"ColorPointGIntensity",              ]],
+        
+        0x0037:[[attribute:"ColorPointBX",            ]],
+        0x0038:[[attribute:"ColorPointBY",         ]],
+        0x003A:[[attribute:"ColorPointBIntensity",              ]],
+        
+    
+        
         0x4001:[[attribute:"EnhancedColorMode",          ]],
         0x4002:[[attribute:"ColorLoopActive",            ]],
         0x4003:[[attribute:"ColorLoopDirection",         ]],
@@ -375,7 +428,7 @@ dv = device value - usually the content of the event map's "value" field after p
         0x0007:[[attribute:"Uncertainty"                                                                ]],
         0x0008:[[attribute:"MeasurementUnit", 	    valueTransform: { MeasurementUnitEnum.get(it) }	    ]],
         0x0009:[[attribute:"MeasurementMedium", 	valueTransform: { MeasurementMediumEnum.get(it) }	]],
-        0x000A:[[attribute:"LevelValue", 	        valueTransform: { LevelValueEnum,.get(it) }	        ]],
+        0x000A:[[attribute:"LevelValue", 	        valueTransform: { LevelValueEnum.get(it) }	        ]],
         ],
     0x130AFC01:[ // Eve Energy Custom Cluster
         0x130A0008:[[attribute:"voltage",             units:"V"		]], 

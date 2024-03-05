@@ -39,11 +39,6 @@ import groovy.transform.CompileStatic
 // Air Quality Cluster 0x005B Enum Data Types (Matter Cluster Spec. Section 2.9.5)
 @Field static Map AirQualityEnumType = [ 0:"Unknown",     1:"Good",    2:"Fair",    3:"Moderate",    4:"Poor",    5:"VeryPoor",    6:"ExtremelyPoor"]
 
-// Concentration Measurement Clusters 0x040C (and others) (Matter Cluster Spec. Section 2.10.5)
-@Field static Map MeasurementUnitEnum =   [0:"PPM", 1:"PPB", 2:"PPT", 3:"MGM3", 4:"UGM3", 5:"NGM3", 6:"PM3", 7:"BQM3"]
-@Field static Map MeasurementMediumEnum =  [0:"Air", 1:"Water", 2:"Soil"]
-@Field static Map LevelValueEnum =   [0:"Unknown", 1:"Low", 2:"Medium", 3:"High", 4:"Critical"]
-
 // Smoke CO Alarm Cluster (Matter Cluster Spec. Section 2.11.5)
 @Field static Map AlarmStateEnum = [0:"Normal", 1:"Warning", 2:"Critical" ]
 @Field static Map SensitivityEnum = [0:"High", 1:"Standard", 2:"Low"]
@@ -109,6 +104,5 @@ import groovy.transform.CompileStatic
 @Field static Map MeasurementUnitEnum =   [ 0:"PPM", 1:"PPB", 2:"PPT", 3:"MGM3", 4:"UGM3", 5:"NGM3", 6:"PM3" ]
 @Field static Map MeasurementMediumEnum = [ 0:"Air", 1:"Water", 2:"Soil" ]
 @Field static Map LevelValueEnum =        [ 0:"Unknown", 1:"Low", 2:"Medium", 3:"High", 4:"Critical" ]
-
 
 

@@ -74,26 +74,7 @@ metadata {
 }
 
 void parse(List description) {
-    description.each {
-        if (device.hasAttribute (it.name)) {
-            if (txtEnable) {
-                if(device.currentValue(it.name) == it.value) {
-                    log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") )+" (unchanged)" // Log if txtEnable and the value is the same
-                } else {
-                    log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") ) // Log if txtEnable and the value is the same
-                }
-            }
-            // Only update a local copy. Don't send all this data through the eventstream!
-            device.updateDataValue(it.name, "${it.value}")
-            /*
-            if (updateLocalStateOnlyAttributes.contains(it.name)) {
-                device.updateDataValue(it.name, "${it.value}")
-            } else {
-                sendEvent(it)
-            }
-            */
-        }
-    }
+    description.each {device.updateDataValue(it.name, "${it.value}") }
 }
 
 void initialize() {
