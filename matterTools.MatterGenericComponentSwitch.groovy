@@ -1,13 +1,8 @@
 metadata {
-    definition(name: "Matter Generic Component RGBW", namespace: "matterTools", author: "jvm", component: true) {
-        capability "Bulb"
+    definition(name: "Matter Generic Component Switch", namespace: "matterTools", author: "jvm", component: true) {
+        capability "Actuator"
         capability "Refresh"
         capability "Switch"
-		capability "SwitchLevel"
-        capability "ChangeLevel"
-        capability "ColorControl"
-        capability "ColorMode"
-        capability "ColorTemperature"
         
         command "on"  , [[name: "Remain on for (seconds)", type:"NUMBER", description:"Turn off the device after the specified number of seconds"]]
         command "toggleOnOff" 
@@ -23,22 +18,7 @@ metadata {
         attribute "OnTime", "number"
         attribute "OffWaitTime", "number"
         attribute "StartUpOnOff", "string"
-        
-        // Level Cluster
-        attribute "OnOffTransitionTime", "number"
-        attribute "OnTransitionTime", "number"
-        attribute "OffTransitionTime", "number"
-
-        attribute "RemainingTime", "number"
-        attribute "MinLevel", "number"
-        attribute "MaxLevel", "number"
-        attribute "OnLevel", "number"
-        attribute "DefaultMoveRate", "number"
-        
-        // Color Cluster
-        attribute "colorCapabilities", "string"
-        attribute "ColorTemperatureMinKelvin", "number"
-        attribute "ColorTemperatureMaxKelvin", "number"
+       
     }
     preferences {
         input(name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true)
@@ -46,7 +26,6 @@ metadata {
 
     }
 }
-#include matterTools.getExpandedColorNames
 import groovy.transform.Field
 import hubitat.helper.HexUtils
 import hubitat.matter.DataType
@@ -66,9 +45,7 @@ void installed() {
 // and those "extra" Maps are discarded. This allows a more generic "event Map" producting method (e.g., matterTools.createListOfMatterSendEventMaps)
 void parse(List sendEventTypeOfEvents) {
     try {
-		List updateLocalStateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", 
-											   "ColorCapabilities","ColorTemperatureMinKelvin", "ColorTemperatureMaxKelvin", 
-											   "MinLevel", "MaxLevel", "DefaultMoveRate", "OffWaitTime", "OnLevel", "Binding", "UserLabelList", "FixedLabelList", "VisibleIndicator"]
+		List updateLocalStateOnlyAttributes = ["OffWaitTime", "Binding", "UserLabelList", "FixedLabelList", "VisibleIndicator"]
 		sendEventTypeOfEvents.each {
 			if (device.hasAttribute (it.name)) {
 				if (txtEnable) {
@@ -88,7 +65,6 @@ void parse(List sendEventTypeOfEvents) {
 		// Always check and reset the color name after any update. 
 		// In reality, only need to do it after a hue, saturation, or color temperature change, 
 		// but for code simplicity, just let sendEvent handle that filtering!
-		setColorName()
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
@@ -106,7 +82,7 @@ void toggleOnStartup(){
          List<Map<String, String>> attrWriteRequests = []
             attrWriteRequests.add(matter.attributeWriteRequest(getEndpoint(), 0x0006, 0x4003, DataType.UINT8, "02" ))
             String cmd = matter.writeAttributes(attrWriteRequests)
-    log.debug "Writing: ${attrWriteRequests} using command string: ${cmd}"
+        log.debug "Writing: ${attrWriteRequests} using command string: ${cmd}"
          sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
 }
 
@@ -118,29 +94,6 @@ void updated() {
             attrWriteRequests.add(matter.attributeWriteRequest(getEndpoint(), 0x0006, 0x4003, DataType.INT8, HexUtils.integerToHexString(StartUpOnOff, 1) ))
         log.debug "Write Requests are: " + attrWriteRequests
          sendHubCommand(new hubitat.device.HubAction(matter.writeAttributes(attrWriteRequests), hubitat.device.Protocol.MATTER))
-    }
-}
-
-void setColorName(){
-    String color
-    switch (device.currentValue("colorMode")){
-        case "RGB":
-            Integer hue = device.currentValue("hue") 
-            Integer saturation =  device.currentValue("saturation")
-            Integer level =  device.currentValue("level")
-            if(hue.is(null) || saturation.is(null) || level.is(null)) return // During startup, one of these may be null!
-            // color = convertHueToGenericColorName(device.currentValue("hue") as Integer )
-            color = getColorNameFromHSV( hue:hue, saturation:saturation, level:level)
-            break
-        case "CT":
-            Integer colorTemperature = device.currentValue("colorTemperature")
-            if(colorTemperature.is(null)) return;
-            color = convertTemperatureToGenericColorName( colorTemperature )
-            break
-    }
-    if (color && (device.currentValue("colorName") != color)  ) { 
-        if(txtEnable) log.info "${device.displayName} set to color: ${color}"
-        sendEvent(name:"colorName", value:color) 
     }
 }
 
@@ -157,43 +110,4 @@ void OnWithTimedOff(timeInSeconds, guardTime = 0) {
     parent?.onWithTimedOff(ep: getEndpoint(), 
                            onTime10ths:(timeInSeconds * 10) as Integer, 
                            ((timeInSeconds + guardTime) * 10) as Integer)
-}
-                                         
-                                         
-void setLevel(level) { parent?.setLevel(ep: getEndpoint(), level:level) }
-
-void setLevel(level, ramp) { parent?.setLevel(ep: getEndpoint(), level:level as Integer, transitionTime10ths:(ramp* 10) as Integer ) }
-
-void startLevelChange(direction) { parent?.startLevelChange(ep: getEndpoint(), direction:direction) }
-
-void stopLevelChange() { parent?.stopLevelChange(ep: getEndpoint()) }
-
-void setColor(colormap){  parent?.setColor(ep: getEndpoint(), 
-                                           *:colormap) }
-
-void setHue(hue) { parent?.setHue(ep: getEndpoint(), 
-                                  hue: hue as Integer) }
-
-void setSaturation(saturation) { 
-    parent?.setSaturation(ep: getEndpoint(), 
-                          saturation:saturation as Integer) }
-
-void setColorTemperature(colortemperature, level = null, transitionTime = null) { 
-    parent?.setColorTemperature(ep: getEndpoint(), 
-                                colortemperature:colortemperature, 
-                                level:level as Integer, 
-                                transitionTime10ths: (transitionTime.is(null)) ? null : (transitionTime * 10)) 
-}
-
-void clearLeftoverStates() {
-	// Can't modify state from within state.each{}, so first collect what is unwanted, then remove in a separate unwanted.each
-	state.keySet().each{state.remove( it ) }
-}
-
-void removeAllSettings() {
-    if (logEnable) log.debug "settings before clearing: " + settings
-    // Copy keys set first to avoid any chance of concurrent modification
-    def keys = new HashSet(settings.keySet())
-    keys.each{ key -> device.removeSetting(key) }
-     if (logEnable) log.debug "settings after clearing: " + settings
-}
+}                       

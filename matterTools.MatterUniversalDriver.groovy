@@ -8,7 +8,6 @@ import hubitat.matter.DataType
 #include matterTools.levelClusterMethods0x0008 // Level cluster methods supporting named parameters, endpoints, and child devices
 #include matterTools.ColorClusterMethods0x0300 // Color Cluster methods supporting named parameters, endpoints, and child devices
 #include matterTools.createListOfMatterSendEventMaps // Converts the data from parseAsMap to Hubitat event form
-// #include matterTools.commonDriverMethods // Main body of the driver, including parse handling and event distribution
 #include matterTools.matterHelperUtilities
 #include matterTools.concurrentRuntimeDataStorage
 #include matterTools.parseDescriptionAsDecodedMap
@@ -19,17 +18,11 @@ metadata {
 		capability "Initialize"
 		capability "Refresh"
         
-        command "testLimitedRefresh"
-        
         command "identify", [[name: "Identify", type:"NUMBER", description:"Put device into Identify mode"]]
-        command "recreateChildDevices" // For debugging purposes
-        command "createEveMotionChildDevices" // For debugging purposes
-        command "createEveEnergyOutletDevice" // For debugging purposes
 
         command "unsubscribeAll" // For debugging purposes
         command "resubscribeAll" // / For debugging purposes
-        command "createRGBDevice" // For debugging purposes
-        command "deleteAllChildDevices" // For debugging purposes
+        command "prettyPrintStoredAttributeData"
     }
     
     preferences {
@@ -40,38 +33,7 @@ metadata {
     fingerprint endpointId:"00", model:"Smart RGBTW Bulb", manufacturer:"Leedarson", controllerType:"MAT"
 }
 
-void testLimitedRefresh(){
-    if (txtEnable) log.debug "Refreshing  cluster 0x0006, all attributes, on endpoint #1"
-    refreshMatter(ep:1, clusterInt:0x0006)
-    
-}
 
-@Field static final Map checkChildDevicesOnReboot = [
-    name: "checkchildDevicesOnReboot",
-    title: "<b>Check and Rebuild Child Devices on Boot</b>",
-    type: "bool",
-    defaultValue: false,
-    options: [],
-    description: "Check for presence of all necessary child devices and correct driver types on reboot"
-]
-
-// These functions will be replaced by a routine that creates child devices based on endpoint device types.
-// Currently, there is a parse error in Hubitat on endpoint type that prevents doing so!
-void createRGBDevice(){
-    device.updateDataValue("endpointId", "0000")
-    addNewChildDevice(endpointType:0x0016, ep:0)
-    addNewChildDevice(endpointType:0x0105, ep:1)
-}
-void createEveMotionChildDevices(){
-    addNewChildDevice(endpointType:0x0016, ep:0)
-    addNewChildDevice(endpointType:0x0107, ep:1)
-    addNewChildDevice(endpointType:0x0106, ep:2)
-}
-
-void createEveEnergyOutletDevice(){
-    addNewChildDevice(endpointType:0x0016, ep:0)
-    addNewChildDevice(endpointType:0x010A, ep:1)
-}
 
 // This "parse" method handles Hubitat SendEvent type messages (not the description raw strings originating from the device). 
 // It would be preferable if this had a different name so as to not cause confusion with the "parse" method for the description Strings from devices, but
@@ -146,6 +108,9 @@ void parse(String description) {
         if ((decodedDescMap.clusterInt in ignoreTheseClusters) || (decodedDescMap.attrInt in ignoreTheseAttributes)) { return }
         
         storeRetrievedData(decodedDescMap)
+        if ( ( decodedDescMap.clusterInt == 0x001D ) && ( decodedDescMap.attrInt.is(0x0000) )) {
+            checkAndCreateChildDevices(decodedDescMap)
+        }
         
         List<Map> hubEvents = getHubitatEvents(decodedDescMap)
         if (hubEvents.is(null)) { 

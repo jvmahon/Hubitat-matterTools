@@ -50,7 +50,7 @@ void on( Map params = [:] ){
         Map inputs = [ ep:getEndpointIdInt(device)] << params
         assert inputs.ep instanceof Integer // Use Integer, not Hex!
 
-        sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x01), hubitat.device.Protocol.MATTER))  
+        sendHubCommand(new hubitat.device.HubAction(matter.invoke(inputs.ep, 0x0006, 0x01 ), hubitat.device.Protocol.MATTER))  
     } catch (AssertionError e) {
         log.error "Incorrect parameter type or value used in on() method.<br><pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){

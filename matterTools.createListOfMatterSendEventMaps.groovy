@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils
 @Field static Closure toTenths = { it / 10}      // Hex to .1 conversion.
 @Field static Closure toCenti =  { it / 100}     // Hex to .01 conversion.
 @Field static Closure toMilli =  { it / 1000}    // Hex to .001 conversion.
-@Field static Closure HexToPercent = { (it / 2.54) as Integer}
+@Field static Closure HexToPercent = { it ? Math.max(((it / 2.54) as Integer), 1) : 0 } // the Math.max check ensures that a value of 1/2.54 does not get changes to 0
 @Field static Closure HexToLux =          { Math.pow( 10, (it - 1) / 10000)  as Integer} // convert Matter value to illumination in lx. See Matter Cluster Spec Section 2.2.5.1
 @Field static Closure MiredsToKelvin = { ( (it > 0) ? (1000000 / it) : null ) as Integer}
 
@@ -221,9 +221,10 @@ dv = device value - usually the content of the event map's "value" field after p
         0x000B:[[attribute:"CurrentMaxRate",          			                	    ]],
         0x000C:[[attribute:"OverrunCount",            			                	    ]],
         ],
-    0x003B:[ // Boolean State
-        0x0000:[[attribute:"StateVale",     ],
-                [attribute:"contact",    valueTransform: { it ? "closed" : "open"} ]], //
+    0x003B:[ // Generic Switch Cluster
+        0x0000:[[attribute:"NumberOfPositions",    		]],
+        0x0001:[[attribute:"CurrentPosition",      		]],
+        0x0002:[[attribute:"MultiPressMax",        		]],
         ],
     0x0040:[ // Fixed Label Cluster, Core Spec 9.8
         0x0000:[[attribute:"FixedLabelList",    		]], // Note attribute name change to prevent confusion between 0x0040 and 0x0041
@@ -231,10 +232,9 @@ dv = device value - usually the content of the event map's "value" field after p
     0x0041:[ // Fixed Label Cluster, Core Spec 9.9
         0x0000:[[attribute:"UserLabelList",    		]], // Note attribute name change to prevent confusion between 0x0040 and 0x0041
         ],
-    0x0045:[ // Generic Switch Cluster
-        0x0000:[[attribute:"NumberOfPositions",    		]],
-        0x0001:[[attribute:"CurrentPosition",      		]],
-        0x0002:[[attribute:"MultiPressMax",        		]],
+    0x0045:[ // Boolean State
+        0x0000:[[attribute:"StateVale",     ],
+                [attribute:"contact",    valueTransform: { it ? "closed" : "open"} ]], //
         ],
     0x0046: [ // ICD Management Cluster
         0x0000:[[attribute:"IdleModeInterval"          ]],
@@ -243,6 +243,14 @@ dv = device value - usually the content of the event map's "value" field after p
         0x0003:[[attribute:"RegisteredClients"         ]],
         0x0004:[[attribute:"ICDCounter"                ]],
         0x0005:[[attribute:"ClientsSupportedPerFabric" ]],
+        ],
+    0x0050: [ // Mode Select Cluster
+        0x0000:[[attribute:"Description"          ]],
+        0x0001:[[attribute:"StandardNamespace"        ]],
+        0x0002:[[attribute:"SupportedModes"       ]],
+        0x0003:[[attribute:"CurrentMode"         ]],
+        0x0004:[[attribute:"StartUpMode"                ]],
+        0x0005:[[attribute:"OnMode" ]],
         ],
     0x0300:[ // Color Control Cluster.  Only covering the most common ones for Hue at the moment!
 		0x0000:[ // Hue
@@ -434,7 +442,7 @@ dv = device value - usually the content of the event map's "value" field after p
         0x130A0008:[[attribute:"voltage",             units:"V"		]], 
         0x130A0009:[[attribute:"amperage",            units:"A"		]], 
         0x130A000A:[[attribute:"power",               units:"W"		]], 
-        0x130A000B:[[attribute:"EveWattsAccumulated", 				]], 
+        0x130A000B:[[attribute:"EveWattAccumulated", 				]], 
         0x130A000E:[[attribute:"EveWattAccumulatedControlPoint", 	]]  
    ],
 ]
