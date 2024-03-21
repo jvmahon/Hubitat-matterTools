@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils
 @Field static Closure toTenths = { it / 10}      // Hex to .1 conversion.
 @Field static Closure toCenti =  { it / 100}     // Hex to .01 conversion.
 @Field static Closure toMilli =  { it / 1000}    // Hex to .001 conversion.
-@Field static Closure HexToPercent = { it ? Math.max(((it / 2.54) as Integer), 1) : 0 } // the Math.max check ensures that a value of 1/2.54 does not get changes to 0
+@Field static Closure HexToPercent = { it ? Math.max( Math.round(it / 2.54) , 1) : 0 } // the Math.max check ensures that a value of 1/2.54 does not get changes to 0
 @Field static Closure HexToLux =          { Math.pow( 10, (it - 1) / 10000)  as Integer} // convert Matter value to illumination in lx. See Matter Cluster Spec Section 2.2.5.1
 @Field static Closure MiredsToKelvin = { ( (it > 0) ? (1000000 / it) : null ) as Integer}
 
@@ -496,7 +496,7 @@ List getHubitatEvents(Map descMap) {
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing getHubitatEvents inputs ${descMap}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }     
 }
 

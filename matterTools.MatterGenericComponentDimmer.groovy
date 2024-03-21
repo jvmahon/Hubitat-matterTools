@@ -7,11 +7,13 @@ metadata {
         capability "ChangeLevel"
         
         command "on"  , [[name: "Remain on for (seconds)", type:"NUMBER", description:"Turn off the device after the specified number of seconds"]]
+        command "setLevel"  , [[name: "Level*", type:"NUMBER", description:"Level to set (0 to 100)"],
+                               [name: "Duration", type:"NUMBER", description:"Transition duration in seconds"], 
+                               [name: "Remain on for (seconds)", type:"NUMBER", description:"Turn off the device after the specified number of seconds"]
+                              ]
         command "toggleOnOff" 
         command "toggleOnStartup"
-        command "testSettingTransitionTime"
-       
-   
+
         // Identify Cluster
         attribute "IdentifyTime", "number"
         attribute "IdentifyType", "string"
@@ -36,7 +38,7 @@ metadata {
     preferences {
         input(name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true)
         input(name: "StartUpOnOff", type: "enum", title:"<b>When Powered On State</b>", description: "<i>Set state when power is first applied to device</i>", options:StartUpOnOffEnum)
-
+        input(name: "minOnLevel", type: "number", title:"<b>Minimum Turn On Value from Hubitat</b>", description: "<i>Minimum Power Level When Switching from Off to On. Only affects Hubitat controller On command.</i>")
     }
 }
 import groovy.transform.Field
@@ -59,7 +61,8 @@ void installed() {
 void parse(List sendEventTypeOfEvents) {
     try {
 		List updateLocalStateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", "MinLevel", "MaxLevel", 
-                                               "DefaultMoveRate", "OffWaitTime", "OnLevel", "Binding", "UserLabelList", "FixedLabelList", "VisibleIndicator"]
+                                               "DefaultMoveRate", "OffWaitTime", "OnLevel", "Binding", "UserLabelList", "FixedLabelList", "VisibleIndicator", 
+                                               "DeviceTypeList", "ServerList", "ClientList", "PartsList", "TagList"]
 		sendEventTypeOfEvents.each {
 			if (device.hasAttribute (it.name)) {
 				if (txtEnable) {
@@ -69,11 +72,9 @@ void parse(List sendEventTypeOfEvents) {
 						log.info ((it.descriptionText) ? (it.descriptionText) : ("${device.displayName}: ${it.name} set to ${it.value}") ) // Log if txtEnable and the value is the same
 					}
 				}
-				if (updateLocalStateOnlyAttributes.contains(it.name)) {
-					device.updateDataValue(it.name, "${it.value}")
-				} else {
-					sendEvent(it)
-				}
+                sendEvent(it)
+            } else if (updateLocalStateOnlyAttributes.contains(it.name)) {
+                device.updateDataValue(it.name, "${it.value}")
 			}
 		}
 		// Always check and reset the color name after any update. 
@@ -82,22 +83,8 @@ void parse(List sendEventTypeOfEvents) {
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing parse with inputs ${sendEventTypeOfEvents}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } 
-}
-void testSettingTransitionTime(){
-         List<Map<String, String>> attrWriteRequests = []
-            attrWriteRequests.add(matter.attributeWriteRequest(0x01, 0x0008, 0x0010, DataType.UINT16, "4000" )) // Set to hex 0x40 = 48
-            String cmd = matter.writeAttributes(attrWriteRequests)
-        log.debug "Writing: ${attrWriteRequests} using command string: ${cmd}"
-         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
-}
-void toggleOnStartup(){
-         List<Map<String, String>> attrWriteRequests = []
-            attrWriteRequests.add(matter.attributeWriteRequest(getEndpoint(), 0x0006, 0x4003, DataType.UINT8, "02" ))
-            String cmd = matter.writeAttributes(attrWriteRequests)
-        log.debug "Writing: ${attrWriteRequests} using command string: ${cmd}"
-         sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
 }
 
 void updated() {
@@ -115,7 +102,14 @@ void refresh() { parent?.refreshMatter(ep: getEndpoint() ) }
 
 Integer getEndpoint() { Integer.parseInt(getDataValue("endpointId") ) }
 
-void on() { parent?.on(ep: getEndpoint() ) }
+void on() { 
+    if (minOnLevel && device.currentValue("level") && (device.currentValue("switch") == "off")) {
+        Integer onLevel = Math.max(minOnLevel as Integer, device.currentValue("level") as Integer)
+        parent?.setLevel(ep: getEndpoint(), level:onLevel)
+    } else {
+        parent?.on(ep: getEndpoint() ) 
+    }
+}
 void on(turnOffAfterSeconds) {   parent?.onWithTimedOff(ep:getEndpoint(), onTime10ths:(turnOffAfterSeconds * 10 as Integer) )}
 
 void off() { parent?.off(ep: getEndpoint() ) }
@@ -127,9 +121,12 @@ void OnWithTimedOff(timeInSeconds, guardTime = 0) {
 }
                                          
                                          
-void setLevel(level) { parent?.setLevel(ep: getEndpoint(), level:level) }
-
-void setLevel(level, ramp) { parent?.setLevel(ep: getEndpoint(), level:level as Integer, transitionTime10ths:(ramp* 10) as Integer ) }
+void setLevel(level, ramp = null, onTime = null ) { parent?.setLevel(ep: getEndpoint(), 
+                                                                     level:level as Integer, 
+                                                                     transitionTime10ths: ramp.is(null) ? null : (ramp* 10) as Integer, 
+                                                                     onTime10ths: onTime.is(null) ? null : (onTime * 10) as Integer 
+                                                                    ) 
+                                                  }
 
 void startLevelChange(direction) { parent?.startLevelChange(ep: getEndpoint(), direction:direction) }
 

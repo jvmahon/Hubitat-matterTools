@@ -56,7 +56,7 @@ void setHue( Map params = [:] ){
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing setHue with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } 
 }
 
@@ -89,7 +89,7 @@ void setSaturation( Map params = [:] ){
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing setSaturation with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } 		
 }
 
@@ -127,7 +127,7 @@ void setColor(Map params = [:]){ // UI passes a Map so trying to set defaults he
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing setColor with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }   
 }
 
@@ -170,7 +170,7 @@ void setColorTemperature( Map params = [:] ){
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing setColorTemperature with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }
 }    
 
@@ -204,6 +204,6 @@ void setColorLoop( Map params = [:] ){
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing setColorLoop with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } 
 }

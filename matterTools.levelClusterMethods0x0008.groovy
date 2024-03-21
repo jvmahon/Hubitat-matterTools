@@ -63,7 +63,7 @@ void startLevelChange(Map params = [:] ){
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing startLevelChange with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }
 }
 
@@ -83,7 +83,7 @@ void stopLevelChange( Map params = [:] ){
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing stopLevelChange with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }
 }
                  
@@ -99,11 +99,17 @@ void componentSetLevel(com.hubitat.app.DeviceWrapper cd, cdLevel, cdDuration = n
 // setLevel implements Matter 1.2 Cluster Spec Section 1.6.7.6, MoveToLevelWithOnOff command 0x04
 void setLevel(inputLevel) {  setLevel(ep: getEndpointIdInt(device), level:(inputLevel as Integer) )} 
 void setLevel(inputLevel, durationSeconds) { 
-    setLevel(ep: getEndpointIdInt(device), level:(inputLevel as Integer), transitionTime10ths: durationSeconds.is(null) ? (null as Integer) : (durationSeconds * 10 as Integer)) // convert time from seconds to 10ths of a second!
+    setLevel(ep: getEndpointIdInt(device), level:(inputLevel as Integer), transitionTime10ths: (durationSeconds * 10 as Integer)) // convert time from seconds to 10ths of a second!
+}
+void setLevel(inputLevel, durationSeconds, remainOnTimeSeconds) { 
+    setLevel(ep: getEndpointIdInt(device), level:(inputLevel as Integer), 
+             transitionTime10ths: durationSeconds.is(null) ? (null as Integer) : (durationSeconds * 10 as Integer), // convert time from seconds to 10ths of a second!
+             onTime10ths: remainOnTimeSeconds.is(null) ? (null as Integer)     : (remainOnTimeSeconds * 10 as Integer), // convert time from seconds to 10ths of a second!
+            ) 
 }
 void setLevel( Map params = [:] ) {
     try { 
-        Map inputs = [ep: null , level: null , transitionTime10ths: null ] << params
+        Map inputs = [ep: null , level: null , transitionTime10ths: null, onTime10ths: null ] << params
         assert inputs.ep instanceof Integer  // Check that endpoint is an integer
         if (inputs.level instanceof BigDecimal) inputs.level = inputs.level as Integer // Web UI send BigDecimal but want Integer! Fix that.
         assert inputs.level instanceof Integer
@@ -129,10 +135,13 @@ void setLevel( Map params = [:] ) {
         String cmd = matter.invoke(inputs.ep, 0x0008, 0x04, fields) // Move To Level with On/Off
         if (logEnable) log.debug "sending command with transitionTime10ths value ${inputs.transitionTime10ths}: ${cmd}"
           sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))     
+        if (inputs.onTime10ths && (inputs.level > 0) ) {
+            onWithTimedOff(*:inputs)
+        }
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing setLevel with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }
 }
 

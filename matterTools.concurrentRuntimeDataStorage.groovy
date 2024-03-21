@@ -96,7 +96,7 @@ def getStoredAttributeData(Map params = [:] ){
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
-        log.error "<pre>${e}<br><br>when processing description string ${description}<br><br>Stack trace:<br>${getStackTrace(e) }"
+        log.error "<pre>${e}<br><br>when processing getStoredAttributeData with inputs ${inputs}<br><br>Stack trace:<br>${getStackTrace(e) }"
     }   
 }
 
