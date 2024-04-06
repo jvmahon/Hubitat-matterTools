@@ -3,9 +3,9 @@ import hubitat.helper.HexUtils
 import groovy.transform.Field
 metadata {
     definition (name: "Inovelli Matter Mode Select  Test Driver", namespace: "matterTools", author: "jvm33") {
-        command "matterUnsubscribe"
-        command "modeSelectReportSubscriptions"
- 		command "refreshModeSelectAttributes"
+        command "refresh", [[name:"Step 3 - Refresh Attributes", description:"A debugging tool. Choose this to Request Matter Mode Select attribute reports."]]
+        command "matterUnsubscribe", [[name:"Step 1 - Unsubscribe Device", description:"A debugging tool. Choose this to unsubscribe from Matter attribute reports."]]
+        command "modeSelectReportSubscriptions", [[name:"Step 2 - Subscribe Device", description:"A debugging tool. Choose this to subscribe to Matter attribute reports."]]
 
     }
        preferences {
@@ -89,9 +89,9 @@ void modeSelectReportSubscriptions(){
 }
 
 
-void refreshModeSelectAttributes() {
+void refresh() {
     log.info "${device.displayName}: Refreshing Mode Select Data on All Endpoints."
-    refreshMatter(ep:0xFFFF, clusterInt: 0x0050, attrInt: 0xFFFFFFFF) // get the labels first just in case child devices are to be created!
+    refreshMatter(ep:0xFFFF, clusterInt: 0x0050, attrInt: 0xFFFFFFFF)
 }
 
 
