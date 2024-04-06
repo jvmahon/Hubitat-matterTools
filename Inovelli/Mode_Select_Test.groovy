@@ -6,98 +6,73 @@ metadata {
         command "matterUnsubscribe"
         command "modeSelectReportSubscriptions"
  		command "refreshModeSelectAttributes"
-      
-        command "switchMode",     [[name:"Switch Mode", type:"ENUM", constraints:choiceMap[1]]]      
-        command "smartBulbMode",  [[name:"Smart Bulb Mode", type:"ENUM", constraints:choiceMap[2]]]
-        command "dimmingEdge",    [[name:"Dimming Edge", type:"ENUM", constraints:choiceMap[3]]]      
-        command "buttonDelay",    [[name:"Button Delay", type:"ENUM", constraints:choiceMap[4]]]      
-        command "relay",          [[name:"Relay", type:"ENUM", constraints:choiceMap[5]]]      
-        command "ledColor",       [[name:"LED Color", type:"ENUM", constraints:choiceMap[6]]]      
-        attribute "switchMode", "string"
-        attribute "smartBulbMode", "string"
-        attribute "dimmingEdge", "string"
-        attribute "buttonDelay", "string"
-        attribute "relay", "string"
-        attribute "ledColor", "string"
 
+    }
+       preferences {
+           input( name: "ModeSelect_1", type:"enum", options:modeSelectMenuMap[1].menuItems,  title:modeSelectMenuMap[1].title, description: modeSelectMenuMap[1].description )   
+           input( name: "ModeSelect_2", type:"enum", options:modeSelectMenuMap[2].menuItems,  title:modeSelectMenuMap[2].title, description: modeSelectMenuMap[2].description )   
+           input( name: "ModeSelect_3", type:"enum", options:modeSelectMenuMap[3].menuItems,  title:modeSelectMenuMap[3].title, description: modeSelectMenuMap[3].description )   
+           input( name: "ModeSelect_4", type:"enum", options:modeSelectMenuMap[4].menuItems,  title:modeSelectMenuMap[4].title, description: modeSelectMenuMap[4].description )   
+           input( name: "ModeSelect_5", type:"enum", options:modeSelectMenuMap[5].menuItems,  title:modeSelectMenuMap[5].title, description: modeSelectMenuMap[5].description )   
+           input( name: "ModeSelect_6", type:"enum", options:modeSelectMenuMap[6].menuItems,  title:modeSelectMenuMap[6].title, description: modeSelectMenuMap[6].description )   
+      }
+}
+
+void updated(){
+    // Process the mode updates!
+    for (int ep = 1; ep<=6; ep++) {
+        Integer updatedMode = Integer.parseInt(device.getSetting("ModeSelect_${ep}"), 10)
+        if (!updatedMode.is(null)) { changeToMode(ep:ep, mode:updatedMode) }
     }
 }
 
-// It would be better to read the menu choices from the device, but this is good enough for testing purposes
+// Another option is to read the menu choices from the device, but this allows addition of decription text!
 // Map is by endpoint (1-6), then choices for the ModeSelect for that endpoint.
-@Field static choiceMap =[    
-    1:[0:"OnOff + Single", 1:"OnOff + Dumb", 2:"OnOff + AUX", 3:"OnOff + Full Wave(default)", 4:"Dimmer + Single", 5:"Dimmer + Dumb", 6:"Dimmer + AUX" ],
-    2:[0:"Normal Mode", 1:"Use Smart Bulb Mode"],
-    3:[0:"Leading", 1:"Trailing"],
-    4:[0:"No Delay", 3:"300ms", 5:"500ms (default)", 7:"700ms"],
-    5:[0:"Relay Click Enabled (default)", 1:"Relay Click Disabled"],
-    6:[ 0:"Red", 1:"Orange", 2:"Lemon", 3:"Lime", 4:"Green", 5:"Teal", 6:"Cyan", 7:"Aqua", 8:"Blue", 9:"Violet",  10:"Magenta", 11:"Pink", 12:"White" ],
+@Field static modeSelectMenuMap =[    
+    1:[title:"<b>Switch or Dimmer Mode</b>", 
+       menuItems:[0:"OnOff + Single", 1:"OnOff + Dumb", 2:"OnOff + AUX", 3:"OnOff + Full Wave(default)", 4:"Dimmer + Single", 5:"Dimmer + Dumb", 6:"Dimmer + AUX" ],
+       description:"Operate as a On/Off Device or a Dimmer, and set the type of 3-way switch if in 3-way configuration.",
+      ],
+    2:[title:"<b>Smart Bulb Operation</b>", 
+       menuItems:[0:"Normal Mode", 1:"Use Smart Bulb Mode"],
+       description:"Normal Mode means device controls power to the load, Smart Bulb Mode means power to load is always on",
+      ],
+    3:[title:"<b>Set Dimming Edge (advanced)</b>", 
+       menuItems:[0:"Leading", 1:"Trailing"],
+       description:"Experiment to find the dimming type that works best with your LED bulbs.",
+      ],
+    4:[title:"<b>Button Tapping Timeout</b>", 
+       menuItems:[0:"No Delay (Disable Button Tap Detection)", 3:"300ms", 5:"500ms (default)", 7:"700ms"],
+       description:"Maximum time to detect a sequence of button taps",
+      ],
+    5:[title:"<b>Relay Operation</b>", 
+       menuItems:[0:"Relay Enabled (default)", 1:"Relay Disabled (Quiet Operation)"],
+       description:"Relay Enabled ensures that even the most fussy LEDs turn off, but adds noise. Disable for quiet operation!",
+       ],
+    6:[title:"<b>LED Strip Color</b>", 
+       menuItems:[ 0:"Red", 1:"Orange", 2:"Lemon", 3:"Lime", 4:"Green", 5:"Teal", 6:"Cyan", 7:"Aqua", 8:"Blue", 9:"Violet",  10:"Magenta", 11:"Pink", 12:"White" ],
+       description:"Color of LED strip during dimming operations. A separate RGB control sets color for the alert feature!",
+      ],
     ]
 
-
-void switchMode(selectedMode){
-    log.debug "Changing endpoint 1 to mode: ${selectedMode}"
-    Integer updatedMode = choiceMap[1].find({it.value == selectedMode}).key
-    log.info "updated mode is: ${updatedMode}"
-    changeToMode(ep:1, mode:updatedMode)
+void handleModeSelectClusterUpdate(decodedDescriptionMap){
+    switch(decodedDescriptionMap.attrInt){
+        case 0x0003: // Current Mode
+            String settingsName = "ModeSelect_${decodedDescriptionMap.endpointInt}"
+            String newValue = "${decodedDescriptionMap.decodedValue}" // Hubitat oddity - all device.settings keys are strings, so newValue must be a number in string format, even though the index to menuItems was originally an Intger number
+            device.updateSetting(settingsName, [value:newValue, type:"enum"])
+            break
+        }
 }
-void smartBulbMode(selectedMode){
-    log.debug "Changing endpoint 2 to mode: ${selectedMode}"
-    Integer updatedMode = choiceMap[2].find({it.value == selectedMode}).key
-    log.info "updated mode is: ${updatedMode}"
-    changeToMode(ep:2, mode:updatedMode)
-}
-void dimmingEdge(selectedMode){
-    log.debug "Changing endpoint 3 to mode: ${selectedMode}"
-    Integer updatedMode = choiceMap[3].find({it.value == selectedMode}).key
-    log.info "updated mode is: ${updatedMode}"
-    changeToMode(ep:3, mode:updatedMode)
-}
-void buttonDelay(selectedMode){
-    log.debug "Changing endpoint 4 to mode: ${selectedMode}"
-    Integer updatedMode = choiceMap[4].find({it.value == selectedMode}).key
-    log.info "updated mode is: ${updatedMode}"
-    changeToMode(ep:4, mode:updatedMode)
-}
-void relay(selectedMode){
-    log.debug "Changing endpoint 5 to mode: ${selectedMode}"
-    Integer updatedMode = choiceMap[5].find({it.value == selectedMode}).key
-    log.info "updated mode is: ${updatedMode}"
-    changeToMode(ep:5, mode:updatedMode)
-}
-void ledColor(selectedMode){
-    log.debug "Changing endpoint 6 to mode: ${selectedMode}"
-    Integer updatedMode = choiceMap[6].find({it.value == selectedMode}).key
-    log.info "updated mode is: ${updatedMode}"
-    changeToMode(ep:6, mode:updatedMode)
-}
-
 
 // This parser handles the Matter event message originating from Hubitat.
 void parse(String description) {
-        Map decodedDescriptionMap = parseDescriptionAsDecodedMap(description) // Using parser from matterTools.parseDescriptionAsDecodedMap
-        log.info "${device.displayName}: Received report: <font color='blue'>${decodedDescriptionMap}"
-    if ((decodedDescriptionMap.clusterInt == 0x0050) && (decodedDescriptionMap.attrInt == 0x0003 ) ){
-        switch(decodedDescriptionMap.endpointInt){
-            case 1:
-                sendEvent(name:"switchMode", value:choiceMap[1].get(decodedDescriptionMap.decodedValue));
-                break;
-            case 2:
-                sendEvent(name:"smartBulbMode", value:choiceMap[2].get(decodedDescriptionMap.decodedValue));
-                break;
-            case 3:
-                sendEvent(name:"dimmingEdge", value:choiceMap[3].get(decodedDescriptionMap.decodedValue));
-                break;
-            case 4:
-                sendEvent(name:"buttonDelay", value:choiceMap[4].get(decodedDescriptionMap.decodedValue));
-                break;
-            case 5:
-                sendEvent(name:"relay", value:choiceMap[5].get(decodedDescriptionMap.decodedValue));
-                break;
-            case 6:
-                sendEvent(name:"ledColor", value:choiceMap[6].get(decodedDescriptionMap.decodedValue));
-                break;
-        }
+    Map decodedDescriptionMap = parseDescriptionAsDecodedMap(description) // Using parser from matterTools.parseDescriptionAsDecodedMap
+    log.info "${device.displayName}: Received report: <font color='blue'>${decodedDescriptionMap}"
+    switch(decodedDescriptionMap.clusterInt){
+        case 0x0050:
+            handleModeSelectClusterUpdate(decodedDescriptionMap)
+            break
     }
 }
 
