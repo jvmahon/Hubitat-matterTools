@@ -1,15 +1,15 @@
-# Inovelli VTM35SN Hubitat Driver (Custom)
+# Inovelli VTM31SN Hubitat Driver (Custom)
 Additional Details to Come
 
 
 ## A Word of Caution
 This driver is experimental. Use at your own risk.
 
-The Inovelli VTM35 can also be used with Hubitat's built-in "Matter Generic Driver" driver. That driver will allow basic control of the dimming endpoint.
+The Inovelli VTM31 can also be used with Hubitat's built-in "Matter Generic Driver" driver. That driver will allow basic control of the dimming endpoint.
 
 
 ## Features
-This driver supports several advanced features for the VTM35 SN including:
+This driver supports several advanced features for the VTM31 SN including:
 * Support for controlling (a) the main electrical dimmer Load as well (b) separately controlling the LED bar in "Alert" mode.
 * Ability to configure device features from the driver
 * Button Tapping (coming in a future update, after Hubitat gets further along in their Matter implementation)
@@ -23,7 +23,7 @@ There appear to be some issues with subscribing to device reports and other feat
 
 ![image](https://github.com/user-attachments/assets/d5a1fda5-8b60-4eb7-9653-23e5dd1c72bb)
 
-2 Pair your  VTM35SN to Hubitat.  It will install with a default driver of "Device". You are going to need to change this:
+2 Pair your  VTM31SN to Hubitat.  It will install with a default driver of "Device". You are going to need to change this:
 ![image](https://github.com/user-attachments/assets/c9c521ce-ea01-45b4-93e2-fea2b8110d24)
 
 3 Change the default driver to "Inovelli VTM31-SN Advanced Device Driver and save the change":
