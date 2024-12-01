@@ -1,16 +1,14 @@
-# Inovelli VTM31SN Hubitat Driver (Custom)
+# Inovelli White Series Hubitat Driver (Custom)
 Additional Details to Come
 
+This driver set supports the Inovelli VTM31 2-in-1 switch and VTM35 fan switch.
 
-## A Word of Caution
-This driver is experimental. Use at your own risk.
-
-The Inovelli VTM31 can also be used with Hubitat's built-in "Matter Generic Driver" driver. That driver will allow basic control of the dimming endpoint.
+The Hubitat 2.4 firmware version has updated their interface. This documentation has not been updated yet.
 
 
 ## Features
-This driver supports several advanced features for the VTM31 SN including:
-* Support for controlling (a) the main electrical dimmer Load as well (b) separately controlling the LED bar in "Alert" mode.
+This driver supports several advanced features for the VTM31 and VTM35 switches including:
+* Support for controlling (a) the main electrical Load (dimmer for VTM31, and fan for VTM35) as well (b) separately controlling the LED bar in "Alert" mode.
 * Ability to configure device features from the driver
 * Button Tapping (coming in a future update, after Hubitat gets further along in their Matter implementation)
 
