@@ -115,6 +115,11 @@ void setLevel( Map params = [:] ) {
         assert inputs.level instanceof Integer
         inputs.level = Math.round(Math.max(Math.min(inputs.level, 100), 0)) // level is a % and must be between 0 and 100
         
+        // if level == 0, switch this to an "off" command. You could turn off by setting level to 0
+        // but then the next turn-on level will often result in a 1% turn-on value which is generally not what was intended
+        // by converting to an "off" , the prior level will be restored for the next "on" action.
+        if (inputs.level == 0) { off(*:inputs) ; return }
+        
         // Per Matter Spec, if transitionTime is null, use OnOffTransitionTime attribute value.
         // get that from previously retrieved data using getOnOffTransitionTime function or use 0 if that is unavailable. 
         // transitionTime is nullable. See Matter cluster spec 0008, Section 1.6.7.1, and core spec section 7.18 (Data Types),

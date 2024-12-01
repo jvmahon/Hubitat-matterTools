@@ -21,7 +21,7 @@ Map getComponentDriverByDeviceType(Map params = [:] ){
      // The following list can have multiple choices for each device type. Put them in ordered rank!  Lower priority is better!
     Map<List<Map>> componentDriver = [
         0x0015:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Contact Sensor",         properties:[isComponent:false, name:null, label: null] ] ], // Contact Sensor
-        0x0016:[[priority:1, namespace:"matterTools",  name:"Matter Device Management",                 properties:[isComponent:true,  name:null, label: null] ] ], // Device Management
+        // 0x0016:[[priority:1, namespace:"matterTools",  name:"Matter Device Management",                 properties:[isComponent:true,  name:null, label: null] ] ], // Device Management
         0x0076:[[priority:1, namespace:"hubitat" ,     name:"Generic Component Smoke Detector",         properties:[isComponent:false, name:null, label: null] ] ], // Smoke CO Alarm
         0x0100:[[priority:1, namespace:"matterTools" , name:"Matter Generic Component Switch",          properties:[isComponent:false, name:null, label: null] ],  // On/Off Light,
                 [priority:2, namespace:"hubitat" ,     name:"Generic Component Switch",                 properties:[isComponent:false, name:null, label: null] ] 
@@ -56,24 +56,34 @@ Map getComponentDriverByDeviceType(Map params = [:] ){
     return childDeviceDriverCandidates?.min{it.priority}
 }
 
+Boolean isUtilityNode(decodedDescMap){
+    List utilityNodes = [0x0011, 0x0012, 0x0013, 0x0014, 0x0016, 0x0510, 0x050D ]
+    return decodedDescMap.decodedValue.any{ it[0] in utilityNodes }
+}
+
 com.hubitat.app.DeviceWrapper checkAndCreateChildDevices(decodedDescMap){
     try{
-		Integer deviceType = decodedDescMap.decodedValue[0][0]
+        com.hubitat.app.DeviceWrapper cd = childDevices.find{ getEndpointIdInt(it) == decodedDescMap.endpointInt }
+		if(cd) { return cd } // Do nothing if child devices already exist for this endpoint
         
+		if (isUtilityNode(decodedDescMap)) return
+        
+        // if the deviceType has multiple entries, pick the highest values
+        // multiple values are usually only present for superset device types (Matter Core Spec. 9.2.5), and in those cases
+        // the highest value is typically the most sophisticated of the device types (e.g., On/Off Light < Dimmable Light < RGBW Light)
+        Integer deviceType = decodedDescMap.decodedValue.collect({it[0]})?.max()
+
+        if (deviceType.is(null)) {
+            if (logEnable) log.debug "Received a null device type when trying to create a child device: Report was: ${decodedDescMap}"
+            return
+        }
         // No child devices for Generic Switch and Mode Select!
-        if (deviceType in [0x000F, 0x0050, 0x0103, 0x0104, 0x0105]) {
-            if(logEnable) log.warn "No child device created for endpoint ${decodedDescMap.endpointInt} device type ${deviceType}. This is expected."
+        if (deviceType in [0x000E, 0x000F, 0x0027, 0x0050, 0x0103, 0x0104, 0x0105]) {
+            if(logEnable) log.debug "${device.displayName}: No child device created for endpoint ${decodedDescMap.endpointInt} Matter device type ${deviceType}. This is expected."
             return null
         }
-        
-		com.hubitat.app.DeviceWrapper cd = childDevices.find{ getEndpointIdInt(it) == decodedDescMap.endpointInt }
-		// Do nothing if child devices already exist for this endpoint
-		if(cd) { 
-            if(logEnable) log.debug "In method checkAndCreateChildDevices, did nothing since child device already exists."
-            return null 
-        }
-			
-		// Get a list of all candidate drivers that work for this endpoint type, in preferenc rank
+   
+		// Get a list of all candidate drivers that work for this endpoint type, in preference rank
 		Map  childDeviceDriver = getComponentDriverByDeviceType(deviceType:deviceType)
 		assert childDeviceDriver
 			
@@ -82,6 +92,9 @@ com.hubitat.app.DeviceWrapper checkAndCreateChildDevices(decodedDescMap){
 		String childDeviceNetworkID = device.deviceNetworkId + "-ep0x${ HexUtils.integerToHexString(decodedDescMap.endpointInt, 2).padLeft(4, "0") }"
 			
 		childDeviceDriver.properties.endpointId = HexUtils.integerToHexString( decodedDescMap.endpointInt, 2)
+        
+        // Add a label using endpoint
+        childDeviceDriver.properties.label = "Matter device endpoint ${decodedDescMap.endpointInt} with device type ${deviceType}"
 			
 		cd = addChildDevice(childDeviceDriver.namespace, childDeviceDriver.name, childDeviceNetworkID, childDeviceDriver.properties) 
 		return cd // return newly created child device or null
@@ -102,7 +115,8 @@ Integer getEndpointIdInt(com.hubitat.app.DeviceWrapper thisDevice) {
 	return Integer.parseInt(rValue, 16)
 }
 
-// Get all the child devices for a specified endpoint.
+// Get all the child devices for a specified endpoint.  This allows for possibility of multiple child devices per endpoint.
+// May want to simplify this to only allow 1 child device per endpoint.
 List<com.hubitat.app.DeviceWrapper> getChildDeviceListByEndpoint( Map params = [:] ) {
     Map inputs = [ep: null ] << params
     assert inputs.ep instanceof Integer

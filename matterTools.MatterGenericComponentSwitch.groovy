@@ -22,8 +22,7 @@ metadata {
     }
     preferences {
         input(name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true)
-        input(name: "StartUpOnOff", type: "enum", title:"<b>When Powered On State</b>", description: "<i>Set state when power is first applied to device</i>", options:StartUpOnOffEnum)
-
+        // input(name: "StartUpOnOff", type: "enum", title:"<b>When Powered On State</b>", description: "<i>Set state when power is first applied to device</i>", options:StartUpOnOffEnum)
     }
 }
 import groovy.transform.Field
@@ -87,6 +86,7 @@ void toggleOnStartup(){
 }
 
 void updated() {
+    /*
     Integer StartUpOnOff = settings?.StartUpOnOff as Integer
     if (StartUpOnOff && (StartUpOnOffEnum.get(StartUpOnOff) != device.currentValue("StartUpOnOff"))){
         log.info "updating, Changing Startup State from ${device.currentValue("StartUpOnOff")} to ${StartUpOnOffEnum.get(StartUpOnOff)}"
@@ -95,6 +95,7 @@ void updated() {
         log.debug "Write Requests are: " + attrWriteRequests
          sendHubCommand(new hubitat.device.HubAction(matter.writeAttributes(attrWriteRequests), hubitat.device.Protocol.MATTER))
     }
+    */
 }
 
 void refresh() { parent?.refreshMatter(ep: getEndpoint() ) }

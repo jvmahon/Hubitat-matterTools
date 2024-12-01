@@ -11,9 +11,10 @@ import hubitat.matter.DataType
 #include matterTools.matterHelperUtilities
 #include matterTools.concurrentRuntimeDataStorage
 #include matterTools.parseDescriptionAsDecodedMap
+#include matterTools.modeSelectClusterMethods0x0050
 
 metadata {
-    definition (name: "Matter Universal Driver", namespace: "matterTools", author: "jvm33") {
+    definition (name: "Matter Test Mode Select Driver", namespace: "matterTools", author: "jvm33") {
         capability "Configuration"		
 		capability "Initialize"
 		capability "Refresh"
@@ -25,6 +26,8 @@ metadata {
                 command "eventSubscribe" // / For debugging purposes
 
         command "prettyPrintStoredAttributeData"
+        command "loadControlBarColor", [[name:"Color", type:"NUMBER"]]
+        command "smartBulbMode", [[name:"Smart Bulb Mode", type:"NUMBER"]]
     }
     
     preferences {
@@ -36,7 +39,14 @@ metadata {
 }
 
 
+void loadControlBarColor(newMode){
+        changeToMode(ep:6, mode:(newMode as Integer))
+}
 
+void smartBulbMode(newMode){
+    log.debug "Changing endpoint 2 to mode: ${newMode}"
+    changeToMode(ep:2, mode:(newMode as Integer))
+}
 // This "parse" method handles Hubitat SendEvent type messages (not the description raw strings originating from the device). 
 // It would be preferable if this had a different name so as to not cause confusion with the "parse" method for the description Strings from devices, but
 // Hubitat's convntion has been to include a parse() routine with this function in Generic Component drivers (child device drivers) so for compatibility with 

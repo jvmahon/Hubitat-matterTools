@@ -4,10 +4,10 @@ This is primarily used for storing cluster and attribute data.
 A concurrentHashMap is used to avoid conflicting writes where multiple attributes may be reported from a node and get processed simultaneously
 In newer Hubitat drivers, could also use atomicState writes, but this can be faster
 
-Library assumes that descMap also includes the endpointId as an integer (descMap.endpointIdInt). 
-This isn't part of the standard "descMap" parsing, but descMap can be augmented immediately after the parseDescriptionAsMap using
-        descMap = matter.parseDescriptionAsMap(description)
-        descMap.put("endpointInt", (Integer.parseInt(descMap.endpoint, 16)))
+Library assumes that decodedNodeReportMap also includes the endpointId as an integer (decodedNodeReportMap.endpointIdInt). 
+This isn't part of the standard "decodedNodeReportMap" parsing, but decodedNodeReportMap can be augmented immediately after the parseDescriptionAsMap using
+        decodedNodeReportMap = matter.parseDescriptionAsMap(description)
+        decodedNodeReportMap.put("endpointInt", (Integer.parseInt(decodedNodeReportMap.endpoint, 16)))
 See matterTools.commonDriverMethods library for example
 */
 
@@ -29,10 +29,9 @@ import groovy.json.JsonBuilder
 The globalDataStorage variable is the "root' of the data structure used in this library
 Since this is an @Field static variable (shared by all devices that use the driver), the first level of 'get' into this
 variable will be a device's unique network ID. The next level is where the current "device" really starts and begins with a map of one or more endpoint IDs as keys.
-After tha, for each endpoint, there is another map keyed by cluster IDs and for each cluster ID, a map keyed by attribute and then the value for the attribute.
+After that, for each endpoint, there is another map keyed by cluster IDs and for each cluster ID, a map keyed by attribute and then the value for the attribute.
 
 The resultant structure is a Map as follows
-globalDataStorage = [netID#1:[EndpointID#0:[ClusterID#1:[AttributeID#1:value, AttributeID#2:value, etc.], ClusterID#2:[... attribute ID structure ...]], EndpointID#1[repeat sub-structure as per #0]:
 
 globalDataStorage = 
     [  netID#1:
@@ -58,23 +57,23 @@ But you don't actually create this structure, its done by the storeRetrievedData
 
 /* Following function is placed  after the driver parse routine's parseDescriptionAsMap to store most receent retrieved attributes so you can use when needed.
 Typical usage:
-        descMap = matter.parseDescriptionAsMap(description)
-        descMap.put("endpointInt", (Integer.parseInt(descMap.endpoint, 16)))
-        storeRetrievedData(descMap)
+        decodedNodeReportMap = matter.parseDescriptionAsMap(description)
+        decodedNodeReportMap.put("endpointInt", (Integer.parseInt(decodedNodeReportMap.endpoint, 16)))
+        storeRetrievedData(decodedNodeReportMap)
 */
 
-void storeRetrievedData(Map descMap){
+void storeRetrievedData(Map decodedNodeReportMap){
     def valueToStore
-    if (descMap.containsKey("decodedValue")) { // This is for use with my custom parser that produced fully decoded values
-        valueToStore = descMap.decodedValue
-    } else if (descMap.containsKey("value")) {
-        valueToStore = descMap.value
+    if (decodedNodeReportMap.containsKey("decodedValue")) { // This is for use with my custom parser that produced fully decoded values
+        valueToStore = decodedNodeReportMap.decodedValue
+    } else if (decodedNodeReportMap.containsKey("value")) {
+        valueToStore = decodedNodeReportMap.value
     } 
     if (valueToStore.is(null)) return // Java ConcurrentHashMaps can't store null values!
     globalDataStorage.get(device.getDeviceNetworkId(), new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1)) // Get Map for this Network ID or create a blank of one doesn't exist
-        .get(descMap.endpointInt, new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1)) // Get Map for this Endpoint or create a blank of one doesn't exist
-            .get(descMap.clusterInt, new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1)) // Get Map for this cluster or create a blank of one doesn't exist
-                .put(descMap.attrInt, valueToStore) // And then put the attribute value into the map for this attribute / cluster / endpoint / network ID
+        .get(decodedNodeReportMap.endpointInt, new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1)) // Get Map for this Endpoint or create a blank of one doesn't exist
+            .get(decodedNodeReportMap.clusterInt, new ConcurrentHashMap<String,ConcurrentHashMap>(8, 0.75, 1)) // Get Map for this cluster or create a blank of one doesn't exist
+                .put(decodedNodeReportMap.attrInt, valueToStore) // And then put the attribute value into the map for this attribute / cluster / endpoint / network ID
 }
 
 // Following function retrieves the last-stored data for a particular attribute.
@@ -88,6 +87,8 @@ def getStoredAttributeData(Map params = [:] ){
         assert inputs.clusterInt instanceof Integer
         assert inputs.attrInt instanceof Integer
         
+        
+        if (device.is(null)) return // can be Null if called from Metadata
         return globalDataStorage.get(device.getDeviceNetworkId()) // First, get the data sub-Map for this specific node using deviceNetworkId
             ?.get(inputs.endpointInt)
                 ?.get(inputs.clusterInt)
@@ -101,6 +102,9 @@ def getStoredAttributeData(Map params = [:] ){
 }
 
 Map getStoredDeviceData() { return  globalDataStorage.get(device.getDeviceNetworkId()) }
+
+void clearStoredDeviceData() { globalDataStorage.get(device.getDeviceNetworkId())?.clear() }
+
 
 // Returns the device data as JSON. See JsonBuilder class: https://docs.groovy-lang.org/latest/html/gapi/groovy/json/JsonBuilder.html
 JsonBuilder getStoredDeviceDataAsJSON(){ return new JsonBuilder( getStoredDeviceData() ) }

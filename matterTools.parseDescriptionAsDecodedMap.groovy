@@ -257,25 +257,32 @@ Object parseToValue(StringBuilder valueString) {
     return (tag.is(null)) ? (element) : [(tag):(element)]
 }
 
-Map parseRattrDescription(description){
-    assert (description[0..8] == "read attr") 
-    return description.substring( description.indexOf("-") +1).split(",")
+Map parseDescriptionAsDecodedMap(description){
+    try {
+        assert (description[0..8] == "read attr") || (description[0..4] == "event")
+
+        Map descriptionKeyValues = description.substring( description.indexOf("-") +1).split(",")
                         .collectEntries{ entry -> def pair = entry.split(":");  
                             [(pair.first().trim()):(pair.last().trim())] 
                         }  
-}
-
-Map parseDescriptionAsDecodedMap(description){
-    try {
-        Map rattrKeyValues = parseRattrDescription(description)
+        
+        StringBuilder parseDescriptionValueString = new StringBuilder(descriptionKeyValues.value)
+        
+        Object decodedValue = parseToValue(parseDescriptionValueString)        
+        
         Map rValue = [:]
-        rValue.put( ("clusterInt"),  Integer.parseInt(rattrKeyValues.cluster, 16) )
-        rValue.put( ("attrInt"),     Integer.parseInt(rattrKeyValues.attrId, 16) )
-        rValue.put( ("endpointInt"), Integer.parseInt(rattrKeyValues.endpoint, 16) )
-    
-        StringBuilder parseRattrString = new StringBuilder(rattrKeyValues.value)
-        Object decodedValue = parseToValue(parseRattrString)
-        rValue.put("decodedValue", decodedValue) 
+            rValue.put( ("endpointInt"), Integer.parseInt(descriptionKeyValues.endpoint, 16) )
+            rValue.put( ("clusterInt"),  Integer.parseInt(descriptionKeyValues.cluster, 16) )
+            if (descriptionKeyValues.containsKey("attrId")) {
+                rValue.put( ("attrInt"),     Integer.parseInt(descriptionKeyValues.attrId, 16) )
+                rValue.put("decodedValue", decodedValue) 
+                storeRetrievedData(rValue)
+            }
+           if (descriptionKeyValues.containsKey("evtId")) {
+                rValue.put( ("evtInt"),     Integer.parseInt(descriptionKeyValues.evtId, 16) )
+                rValue.put("decodedValue", decodedValue) 
+            }
+
         return rValue
     } catch(AssertionError e)  {
         log.error "In method parseDescriptionAsDecodedMap, Assertion failed with <pre>${e}"

@@ -1,18 +1,27 @@
+/*
+Copyright James V. Mahon
+Distribution requires permission / Not for Commercial distribution
+*/
 metadata {
     definition(name: "Matter Generic Component Dimmer", namespace: "matterTools", author: "jvm", component: true) {
         capability "Actuator"
+        // capability "Bulb"
         capability "Refresh"
         capability "Switch"
 		capability "SwitchLevel"
         capability "ChangeLevel"
+        // capability "ColorControl"
+        // capability "ColorMode"
+        // capability "ColorTemperature"
         
         command "on"  , [[name: "Remain on for (seconds)", type:"NUMBER", description:"Turn off the device after the specified number of seconds"]]
         command "setLevel"  , [[name: "Level*", type:"NUMBER", description:"Level to set (0 to 100)"],
                                [name: "Duration", type:"NUMBER", description:"Transition duration in seconds"], 
                                [name: "Remain on for (seconds)", type:"NUMBER", description:"Turn off the device after the specified number of seconds"]
                               ]
+        
         command "toggleOnOff" 
-        command "toggleOnStartup"
+        command "setOnLevel", [[name: "Set OnLevel)", type:"NUMBER", description:"SetOnLevel 1-255"]]
 
         // Identify Cluster
         attribute "IdentifyTime", "number"
@@ -33,14 +42,20 @@ metadata {
         attribute "MaxLevel", "number"
         attribute "OnLevel", "number"
         attribute "DefaultMoveRate", "number"
+        attribute "StartUpOnOff", "string"
+        
+        // Color Cluster
+        // attribute "colorCapabilities", "string"
+        // attribute "ColorTemperatureMinKelvin", "number"
+        // attribute "ColorTemperatureMaxKelvin", "number"
         
     }
     preferences {
-        input(name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: true)
-        input(name: "StartUpOnOff", type: "enum", title:"<b>When Powered On State</b>", description: "<i>Set state when power is first applied to device</i>", options:StartUpOnOffEnum)
-        input(name: "minOnLevel", type: "number", title:"<b>Minimum Turn On Value from Hubitat</b>", description: "<i>Minimum Power Level When Switching from Off to On. Only affects Hubitat controller On command.</i>")
+        input(name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: false)
     }
 }
+
+// #include matterTools.getExpandedColorNames
 import groovy.transform.Field
 import hubitat.helper.HexUtils
 import hubitat.matter.DataType
@@ -61,6 +76,7 @@ void installed() {
 void parse(List sendEventTypeOfEvents) {
     try {
 		List updateLocalStateOnlyAttributes = ["OnOffTransitionTime", "OnTransitionTime", "OffTransitionTime", "MinLevel", "MaxLevel", 
+											   "ColorCapabilities","ColorTemperatureMinKelvin", "ColorTemperatureMaxKelvin", 
                                                "DefaultMoveRate", "OffWaitTime", "OnLevel", "Binding", "UserLabelList", "FixedLabelList", "VisibleIndicator", 
                                                "DeviceTypeList", "ServerList", "ClientList", "PartsList", "TagList"]
 		sendEventTypeOfEvents.each {
@@ -78,8 +94,9 @@ void parse(List sendEventTypeOfEvents) {
 			}
 		}
 		// Always check and reset the color name after any update. 
-		// In reality, only need to do it after a hue, saturation, or color temperature change, 
+		// Only need to do it after a hue, saturation, or color temperature change, 
 		// but for code simplicity, just let sendEvent handle that filtering!
+		// setColorName()
     } catch (AssertionError e) {
         log.error "<pre>${e}<br><br>Stack trace:<br>${getStackTrace(e) }"
     } catch(e){
@@ -87,15 +104,33 @@ void parse(List sendEventTypeOfEvents) {
     } 
 }
 
+
 void updated() {
-    Integer StartUpOnOff = settings?.StartUpOnOff as Integer
-    if (StartUpOnOff && (StartUpOnOffEnum.get(StartUpOnOff) != device.currentValue("StartUpOnOff"))){
-        log.info "updating, Changing Startup State from ${device.currentValue("StartUpOnOff")} to ${StartUpOnOffEnum.get(StartUpOnOff)}"
-         List<Map<String, String>> attrWriteRequests = []
-            attrWriteRequests.add(matter.attributeWriteRequest(getEndpoint(), 0x0006, 0x4003, DataType.INT8, HexUtils.integerToHexString(StartUpOnOff, 1) ))
-        log.debug "Write Requests are: " + attrWriteRequests
-         sendHubCommand(new hubitat.device.HubAction(matter.writeAttributes(attrWriteRequests), hubitat.device.Protocol.MATTER))
-    }
+    if (logEnable) {
+		log.info "${device.displayName}: Debug logging enabled for 30 minutes"
+		runIn(1800,logsOff)
+	}
+}
+
+void logsOff(){
+    if (txtEnable) "${device.displayName}: Turning off Debug logging."
+    device.updateSetting("logEnable", [value:"false",type:"bool"])
+}
+
+void syncSettingsWithReportedAttributes(event){
+    return // this isn't working yet, so just return!
+}
+
+void setOnLevel(newLevel){
+    log.info "${device.displayName}: Writing ${newLevel} to onLevel..."
+
+    List<Map<String, String>> attrWriteRequests = []
+    attrWriteRequests.add(matter.attributeWriteRequest(getEndpoint(), 0x0008, 0x0011, DataType.UINT8, HexUtils.integerToHexString((Integer) newLevel, 1)))
+    
+    String cmd = matter.writeAttributes(attrWriteRequests)
+    log.debug "Setting Matter onLevel to ${newLevel} using command : ${cmd}"
+    
+    parent?.sendHubCommand(new hubitat.device.HubAction(cmd, hubitat.device.Protocol.MATTER))
 }
 
 void refresh() { parent?.refreshMatter(ep: getEndpoint() ) }
@@ -103,13 +138,9 @@ void refresh() { parent?.refreshMatter(ep: getEndpoint() ) }
 Integer getEndpoint() { Integer.parseInt(getDataValue("endpointId") ) }
 
 void on() { 
-    if (minOnLevel && device.currentValue("level") && (device.currentValue("switch") == "off")) {
-        Integer onLevel = Math.max(minOnLevel as Integer, device.currentValue("level") as Integer)
-        parent?.setLevel(ep: getEndpoint(), level:onLevel)
-    } else {
-        parent?.on(ep: getEndpoint() ) 
-    }
+    parent?.on(ep:getEndpoint())
 }
+
 void on(turnOffAfterSeconds) {   parent?.onWithTimedOff(ep:getEndpoint(), onTime10ths:(turnOffAfterSeconds * 10 as Integer) )}
 
 void off() { parent?.off(ep: getEndpoint() ) }
@@ -119,14 +150,10 @@ void OnWithTimedOff(timeInSeconds, guardTime = 0) {
                            onTime10ths:(timeInSeconds * 10) as Integer, 
                            ((timeInSeconds + guardTime) * 10) as Integer)
 }
-                                         
-                                         
-void setLevel(level, ramp = null, onTime = null ) { parent?.setLevel(ep: getEndpoint(), 
-                                                                     level:level as Integer, 
-                                                                     transitionTime10ths: ramp.is(null) ? null : (ramp* 10) as Integer, 
-                                                                     onTime10ths: onTime.is(null) ? null : (onTime * 10) as Integer 
-                                                                    ) 
-                                                  }
+                                   
+void setLevel(level, ramp = null, onTime = null ) { 
+    parent?.setLevel(ep: getEndpoint(), level:level as Integer, transitionTime10ths: ramp.is(null) ? null : (ramp* 10) as Integer, onTime10ths: onTime.is(null) ? null : (onTime * 10) as Integer ) 
+}
 
 void startLevelChange(direction) { parent?.startLevelChange(ep: getEndpoint(), direction:direction) }
 
