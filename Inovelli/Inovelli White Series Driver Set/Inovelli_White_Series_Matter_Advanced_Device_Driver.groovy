@@ -42,11 +42,15 @@ metadata {
            input( name: "ModeSelect_3", type:"enum", options:getModeSelectOptions(3),  title: (getModeSelectLabel(3) ) )   
            input( name: "ModeSelect_4", type:"enum", options:getModeSelectOptions(4),  title: (getModeSelectLabel(4) ) )   
            input( name: "ModeSelect_5", type:"enum", options:getModeSelectOptions(5),  title: (getModeSelectLabel(5) ) )   
-           input( name: "ModeSelect_6", type:"enum", options:getModeSelectOptions(6),  title: (getModeSelectLabel(6) ) )   
+           input( name: "ModeSelect_6", type:"enum", options:getModeSelectOptions(6),  title: (getModeSelectLabel(6) ) )    
+           input( name: "ModeSelect_7", type:"enum", options:getModeSelectOptions(2),  title: (getModeSelectLabel(7) ) )   
+           input( name: "ModeSelect_8", type:"enum", options:getModeSelectOptions(3),  title: (getModeSelectLabel(8) ) )
     }
     
+    fingerprint endpointId:"01", inClusters:"0003,0004,0006,0008,001D,0040,0041,0050,122FFC31", outClusters:"", model:"VTM30-SN", manufacturer:"Inovelli", controllerType:"MAT"
     fingerprint endpointId:"01", inClusters:"0003,0004,0005,0006,0008,001D,0040,0050,122FFC31", outClusters:"", model:"VTM31-SN", manufacturer:"Inovelli", controllerType:"MAT"
     fingerprint endpointId:"01", inClusters:"0003,0004,0006,0008,001D,0040,0050,0202,122FFC31", outClusters:"", model:"VTM35-SN", manufacturer:"Inovelli", controllerType:"MAT"
+    fingerprint endpointId:"01", inClusters:"0003,0004,0005,0006,0008,001D,0040,0050,122FFC31", outClusters:"", model:"VTM36",    manufacturer:"Inovelli", controllerType:"MAT"
 }
 
 
@@ -85,7 +89,7 @@ void parse(List<Map> sendEventTypeOfEvents) {
 
 // This parser handles the Matter event message originating from Hubitat.
 void parse(String nodeReportRawDescriptionString) {
-    log.debug "Reseived string to parse: ${nodeReportRawDescriptionString}"
+    log.debug "Received string to parse: ${nodeReportRawDescriptionString}"
     try {
         Map decodedNodeReportMap = parseDescriptionAsDecodedMap(nodeReportRawDescriptionString) // Using parser from matterTools.parseDescriptionAsDecodedMap
         log.debug "Main code body decoded a report map ${decodedNodeReportMap}"
@@ -151,7 +155,7 @@ void configure(){
 void componentInitialize(com.hubitat.app.DeviceWrapper cd) { refreshMatter(ep:getEndpointIdInt(cd)) }
 void initialize(){ 
     if (logEnable) log.debug "${device.displayName}: Initialize called!"
-    // configure()
+    configure()
 }
 
 void componentRefresh(com.hubitat.app.DeviceWrapper cd) { refreshMatter(ep:getEndpointIdInt(cd)) }
@@ -170,57 +174,65 @@ library ( // library marker matterTools.InovelliEndpointAndChildDeviceTools, lin
         name: "InovelliEndpointAndChildDeviceTools", // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 6
         namespace: "matterTools", // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 7
         documentationLink: "https://github.com/jvmahon/Hubitat-Matter", // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 8
-		version: "0.6.0" // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 9
+		version: "0.7.0" // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 9
 ) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 10
 
 void checkAndCreateChildDevices(){ // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 12
     try{ // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 13
         switch (getDataValue("model")){ // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 14
-            case "VTM31-SN": // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 15
-               if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Generic Component Dimmer", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Load Control", endpointId:"0001"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 16
+            case "VTM30-SN": // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 15
+               if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Generic Component Switch", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Load Control", endpointId:"0001"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 16
                if (!getChildDeviceListByEndpoint(ep:6)) addChildDevice("matterTools" , "Matter Generic Component RGBW",   "${device.deviceNetworkId}-ep0x0006" , [isComponent:false, name:null, label: "LED Notification Bar", endpointId:"0006"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 17
                 break; // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 18
-            case "VTM35-SN": // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 19
-               if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Inovelli Fan Component", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Fan Control", endpointId:"0001"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 20
-               if (!getChildDeviceListByEndpoint(ep:6)) addChildDevice("matterTools" , "Matter Generic Component RGBW",   "${device.deviceNetworkId}-ep0x0006" , [isComponent:false, name:null, label: "LED Alert Strip", endpointId:"0006"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 21
+            case "VTM31-SN": // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 19
+               if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Generic Component Dimmer", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Load Control", endpointId:"0001"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 20
+               if (!getChildDeviceListByEndpoint(ep:6)) addChildDevice("matterTools" , "Matter Generic Component RGBW",   "${device.deviceNetworkId}-ep0x0006" , [isComponent:false, name:null, label: "LED Notification Bar", endpointId:"0006"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 21
                 break; // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 22
-            } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 23
-        } catch(e){ // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 24
-        log.error "<pre>${e}<br><br>when processing checkAndCreateChildDevices:<br>${getStackTrace(e) }" // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 25
-    } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 26
-} // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 27
+            case "VTM35-SN": // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 23
+               if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Inovelli Fan Component", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Fan Control", endpointId:"0001"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 24
+               if (!getChildDeviceListByEndpoint(ep:6)) addChildDevice("matterTools" , "Matter Generic Component RGBW",   "${device.deviceNetworkId}-ep0x0006" , [isComponent:false, name:null, label: "LED Alert Strip", endpointId:"0006"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 25
+                break; // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 26
+            case "VTM36": // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 27
+               if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Generic Component Dimmer", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Load Control", endpointId:"0001"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 28
+               if (!getChildDeviceListByEndpoint(ep:2)) addChildDevice("matterTools" , "Matter Inovelli Fan Component",   "${device.deviceNetworkId}-ep0x0002" , [isComponent:false, name:null, label: "Fan", endpointId:"0002"]) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 29
+                break; // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 30
+            } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 31
+        } catch(e){ // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 32
+        log.error "<pre>${e}<br><br>when processing checkAndCreateChildDevices:<br>${getStackTrace(e) }" // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 33
+    } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 34
+} // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 35
 
-// This next function will generally override device.getEndpointId() // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 29
-Integer getEndpointIdInt(com.hubitat.app.DeviceWrapper thisDevice) { // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 30
-	String rValue =  thisDevice?.getDataValue("endpointId") ?:   thisDevice?.endpointId  // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 31
-    if (rValue.is( null )) {  // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 32
-        log.error "Device ${thisDevice.displayName} does not have a defined endpointId. Fix this!" // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 33
-        return null // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 34
-    } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 35
-	return Integer.parseInt(rValue, 16) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 36
-} // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 37
-
-// Get all the child devices for a specified endpoint.  This allows for possibility of multiple child devices per endpoint. // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 39
-// May want to simplify this to only allow 1 child device per endpoint. // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 40
-List<com.hubitat.app.DeviceWrapper> getChildDeviceListByEndpoint( Map params = [:] ) { // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 41
-    Map inputs = [ep: null ] << params // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 42
-    assert inputs.ep instanceof Integer // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 43
-	childDevices.findAll{ getEndpointIdInt(it) == inputs.ep } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 44
+// This next function will generally override device.getEndpointId() // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 37
+Integer getEndpointIdInt(com.hubitat.app.DeviceWrapper thisDevice) { // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 38
+	String rValue =  thisDevice?.getDataValue("endpointId") ?:   thisDevice?.endpointId  // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 39
+    if (rValue.is( null )) {  // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 40
+        log.error "Device ${thisDevice.displayName} does not have a defined endpointId. Fix this!" // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 41
+        return null // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 42
+    } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 43
+	return Integer.parseInt(rValue, 16) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 44
 } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 45
 
-// Uses a parse routine to manage sendEvent message distribution // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 47
-// The passing of a sendEvent event to a parse routine is a technique used in Hubitat's Generic Component drivers, so its adopted here. // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 48
-void sendEventsToEndpointByParse(Map params = [:]) { // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 49
-    Map inputs = [ events: null , ep: null ] << params // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 50
-    assert inputs.events instanceof List // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 51
-    assert inputs.ep instanceof Integer // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 52
+// Get all the child devices for a specified endpoint.  This allows for possibility of multiple child devices per endpoint. // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 47
+// May want to simplify this to only allow 1 child device per endpoint. // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 48
+List<com.hubitat.app.DeviceWrapper> getChildDeviceListByEndpoint( Map params = [:] ) { // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 49
+    Map inputs = [ep: null ] << params // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 50
+    assert inputs.ep instanceof Integer // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 51
+	childDevices.findAll{ getEndpointIdInt(it) == inputs.ep } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 52
+} // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 53
 
-	List<com.hubitat.app.DeviceWrapper> targetDevices = getChildDeviceListByEndpoint(ep:(inputs.ep)) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 54
-	// if ((inputs.ep == getEndpointIdInt(device)) || (inputs.ep == 0) )  { targetDevices += this } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 55
-	if (inputs.ep == 0)  { targetDevices += this } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 56
+// Uses a parse routine to manage sendEvent message distribution // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 55
+// The passing of a sendEvent event to a parse routine is a technique used in Hubitat's Generic Component drivers, so its adopted here. // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 56
+void sendEventsToEndpointByParse(Map params = [:]) { // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 57
+    Map inputs = [ events: null , ep: null ] << params // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 58
+    assert inputs.events instanceof List // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 59
+    assert inputs.ep instanceof Integer // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 60
 
-	targetDevices.each { it.parse(inputs.events) } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 58
-} // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 59
+	List<com.hubitat.app.DeviceWrapper> targetDevices = getChildDeviceListByEndpoint(ep:(inputs.ep)) // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 62
+	// if ((inputs.ep == getEndpointIdInt(device)) || (inputs.ep == 0) )  { targetDevices += this } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 63
+	if (inputs.ep == 0)  { targetDevices += this } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 64
+
+	targetDevices.each { it.parse(inputs.events) } // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 66
+} // library marker matterTools.InovelliEndpointAndChildDeviceTools, line 67
 
 // ~~~~~ end include (21) matterTools.InovelliEndpointAndChildDeviceTools ~~~~~
 
@@ -989,18 +1001,28 @@ Integer getModeSelectCurrentMode(Integer ep){ // library marker matterTools.mode
 } // library marker matterTools.modeSelectClusterMethods0x0050, line 42
 
 String getModeSelectLabel(Integer ep){ // library marker matterTools.modeSelectClusterMethods0x0050, line 44
-    "<b>${getStoredAttributeData(endpointInt:ep, clusterInt:0x0050, attrInt:0x0000) ?: "Initialize Device then Refresh Browser"}</b>" // library marker matterTools.modeSelectClusterMethods0x0050, line 45
-} // library marker matterTools.modeSelectClusterMethods0x0050, line 46
-
-void handleModeSelectClusterUpdate(decodedDescriptionMap){ // library marker matterTools.modeSelectClusterMethods0x0050, line 48
-    switch(decodedDescriptionMap.attrInt){ // library marker matterTools.modeSelectClusterMethods0x0050, line 49
-        case 0x0003: // Current Mode // library marker matterTools.modeSelectClusterMethods0x0050, line 50
-            String settingsName = "ModeSelect_${decodedDescriptionMap.endpointInt}" // library marker matterTools.modeSelectClusterMethods0x0050, line 51
-            String newValue = "${decodedDescriptionMap.decodedValue}" // Hubitat oddity - all device.settings keys are strings, so newValue must be a number in string format, even though the index to menuItems was originally an Intger number // library marker matterTools.modeSelectClusterMethods0x0050, line 52
-            device.updateSetting(settingsName, [value:newValue, type:"enum"]) // library marker matterTools.modeSelectClusterMethods0x0050, line 53
-            break // library marker matterTools.modeSelectClusterMethods0x0050, line 54
-        } // library marker matterTools.modeSelectClusterMethods0x0050, line 55
+    log.debug "Mode Select Data model is: " + getDataValue("model") // library marker matterTools.modeSelectClusterMethods0x0050, line 45
+    switch (getDataValue("model")) { // library marker matterTools.modeSelectClusterMethods0x0050, line 46
+        case "VTM36": // library marker matterTools.modeSelectClusterMethods0x0050, line 47
+        	if (ep in [3, 4, 5, 6, 7, 8]) return "<pre><i>Not Used for this device</i></prev>" // library marker matterTools.modeSelectClusterMethods0x0050, line 48
+        	break; // library marker matterTools.modeSelectClusterMethods0x0050, line 49
+        case "VTM31-SN": // library marker matterTools.modeSelectClusterMethods0x0050, line 50
+        case "VTM35-SN": // library marker matterTools.modeSelectClusterMethods0x0050, line 51
+        	if (ep in [7, 8]) return "<pre><i>Not Used for this device</i></prev>" // library marker matterTools.modeSelectClusterMethods0x0050, line 52
+        	break; // library marker matterTools.modeSelectClusterMethods0x0050, line 53
+    } // library marker matterTools.modeSelectClusterMethods0x0050, line 54
+    "<b>${getStoredAttributeData(endpointInt:ep, clusterInt:0x0050, attrInt:0x0000) ?: "Initialize Device then Refresh Browser"}</b>" // library marker matterTools.modeSelectClusterMethods0x0050, line 55
 } // library marker matterTools.modeSelectClusterMethods0x0050, line 56
+
+void handleModeSelectClusterUpdate(decodedDescriptionMap){ // library marker matterTools.modeSelectClusterMethods0x0050, line 58
+    switch(decodedDescriptionMap.attrInt){ // library marker matterTools.modeSelectClusterMethods0x0050, line 59
+        case 0x0003: // Current Mode // library marker matterTools.modeSelectClusterMethods0x0050, line 60
+            String settingsName = "ModeSelect_${decodedDescriptionMap.endpointInt}" // library marker matterTools.modeSelectClusterMethods0x0050, line 61
+            String newValue = "${decodedDescriptionMap.decodedValue}" // Hubitat oddity - all device.settings keys are strings, so newValue must be a number in string format, even though the index to menuItems was originally an Intger number // library marker matterTools.modeSelectClusterMethods0x0050, line 62
+            device.updateSetting(settingsName, [value:newValue, type:"enum"]) // library marker matterTools.modeSelectClusterMethods0x0050, line 63
+            break // library marker matterTools.modeSelectClusterMethods0x0050, line 64
+        } // library marker matterTools.modeSelectClusterMethods0x0050, line 65
+} // library marker matterTools.modeSelectClusterMethods0x0050, line 66
 
 // ~~~~~ end include (19) matterTools.modeSelectClusterMethods0x0050 ~~~~~
 
