@@ -42,6 +42,16 @@ Integer getModeSelectCurrentMode(Integer ep){
 }
 
 String getModeSelectLabel(Integer ep){
+    log.debug "Mode Select Data model is: " + getDataValue("model")
+    switch (getDataValue("model")) {
+        case "VTM36":
+        	if (ep in [3, 4, 5, 6, 7, 8]) return "<pre><i>Not Used for this device</i></prev>"
+        	break;
+        case "VTM31-SN":
+        case "VTM35-SN":
+        	if (ep in [7, 8]) return "<pre><i>Not Used for this device</i></prev>"
+        	break;
+    }
     "<b>${getStoredAttributeData(endpointInt:ep, clusterInt:0x0050, attrInt:0x0000) ?: "Initialize Device then Refresh Browser"}</b>"
 }
 

@@ -42,11 +42,15 @@ metadata {
            input( name: "ModeSelect_3", type:"enum", options:getModeSelectOptions(3),  title: (getModeSelectLabel(3) ) )   
            input( name: "ModeSelect_4", type:"enum", options:getModeSelectOptions(4),  title: (getModeSelectLabel(4) ) )   
            input( name: "ModeSelect_5", type:"enum", options:getModeSelectOptions(5),  title: (getModeSelectLabel(5) ) )   
-           input( name: "ModeSelect_6", type:"enum", options:getModeSelectOptions(6),  title: (getModeSelectLabel(6) ) )   
+           input( name: "ModeSelect_6", type:"enum", options:getModeSelectOptions(6),  title: (getModeSelectLabel(6) ) )    
+           input( name: "ModeSelect_7", type:"enum", options:getModeSelectOptions(2),  title: (getModeSelectLabel(7) ) )   
+           input( name: "ModeSelect_8", type:"enum", options:getModeSelectOptions(3),  title: (getModeSelectLabel(8) ) )
     }
     
+    fingerprint endpointId:"01", inClusters:"0003,0004,0006,0008,001D,0040,0041,0050,122FFC31", outClusters:"", model:"VTM30-SN", manufacturer:"Inovelli", controllerType:"MAT"
     fingerprint endpointId:"01", inClusters:"0003,0004,0005,0006,0008,001D,0040,0050,122FFC31", outClusters:"", model:"VTM31-SN", manufacturer:"Inovelli", controllerType:"MAT"
     fingerprint endpointId:"01", inClusters:"0003,0004,0006,0008,001D,0040,0050,0202,122FFC31", outClusters:"", model:"VTM35-SN", manufacturer:"Inovelli", controllerType:"MAT"
+    fingerprint endpointId:"01", inClusters:"0003,0004,0005,0006,0008,001D,0040,0050,122FFC31", outClusters:"", model:"VTM36",    manufacturer:"Inovelli", controllerType:"MAT"
 }
 
 
@@ -85,7 +89,7 @@ void parse(List<Map> sendEventTypeOfEvents) {
 
 // This parser handles the Matter event message originating from Hubitat.
 void parse(String nodeReportRawDescriptionString) {
-    log.debug "Reseived string to parse: ${nodeReportRawDescriptionString}"
+    log.debug "Received string to parse: ${nodeReportRawDescriptionString}"
     try {
         Map decodedNodeReportMap = parseDescriptionAsDecodedMap(nodeReportRawDescriptionString) // Using parser from matterTools.parseDescriptionAsDecodedMap
         log.debug "Main code body decoded a report map ${decodedNodeReportMap}"
@@ -151,7 +155,7 @@ void configure(){
 void componentInitialize(com.hubitat.app.DeviceWrapper cd) { refreshMatter(ep:getEndpointIdInt(cd)) }
 void initialize(){ 
     if (logEnable) log.debug "${device.displayName}: Initialize called!"
-    // configure()
+    configure()
 }
 
 void componentRefresh(com.hubitat.app.DeviceWrapper cd) { refreshMatter(ep:getEndpointIdInt(cd)) }

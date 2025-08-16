@@ -6,12 +6,16 @@ library (
         name: "InovelliEndpointAndChildDeviceTools",
         namespace: "matterTools",
         documentationLink: "https://github.com/jvmahon/Hubitat-Matter",
-		version: "0.6.0"
+		version: "0.7.0"
 )
 
 void checkAndCreateChildDevices(){
     try{
         switch (getDataValue("model")){
+            case "VTM30-SN":
+               if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Generic Component Switch", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Load Control", endpointId:"0001"])
+               if (!getChildDeviceListByEndpoint(ep:6)) addChildDevice("matterTools" , "Matter Generic Component RGBW",   "${device.deviceNetworkId}-ep0x0006" , [isComponent:false, name:null, label: "LED Notification Bar", endpointId:"0006"])
+                break;
             case "VTM31-SN":
                if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Generic Component Dimmer", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Load Control", endpointId:"0001"])
                if (!getChildDeviceListByEndpoint(ep:6)) addChildDevice("matterTools" , "Matter Generic Component RGBW",   "${device.deviceNetworkId}-ep0x0006" , [isComponent:false, name:null, label: "LED Notification Bar", endpointId:"0006"])
@@ -19,6 +23,10 @@ void checkAndCreateChildDevices(){
             case "VTM35-SN":
                if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Inovelli Fan Component", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Fan Control", endpointId:"0001"])
                if (!getChildDeviceListByEndpoint(ep:6)) addChildDevice("matterTools" , "Matter Generic Component RGBW",   "${device.deviceNetworkId}-ep0x0006" , [isComponent:false, name:null, label: "LED Alert Strip", endpointId:"0006"])
+                break;
+            case "VTM36":
+               if (!getChildDeviceListByEndpoint(ep:1)) addChildDevice("matterTools",  "Matter Generic Component Dimmer", "${device.deviceNetworkId}-ep0x0001" , [isComponent:false, name:null, label: "Load Control", endpointId:"0001"])
+               if (!getChildDeviceListByEndpoint(ep:2)) addChildDevice("matterTools" , "Matter Inovelli Fan Component",   "${device.deviceNetworkId}-ep0x0002" , [isComponent:false, name:null, label: "Fan", endpointId:"0002"])
                 break;
             }
         } catch(e){
