@@ -1,14 +1,14 @@
 # Inovelli White Series Hubitat Driver (Custom)
 Additional Details to Come
 
-This driver set supports the Inovelli VTM31 2-in-1 switch and VTM35 fan switch.
+This driver set supports the Inovelli VTM30, VTM31, VTM35, and VTM36 switches.
 
 The Hubitat 2.4 firmware version has updated their interface. This documentation has not been updated yet.
 
 
 ## Features
-This driver supports several advanced features for the VTM31 and VTM35 switches including:
-* Support for controlling (a) the main electrical Load (dimmer for VTM31, and fan for VTM35) as well (b) separately controlling the LED bar in "Alert" mode.
+This driver supports several advanced features for the VTM30, VTM31, VTM36 and VTM36 switches including:
+* Support for controlling (a) the main electrical Load (switch for VTM30, dimmer for VTM31, and both dimmer and fan for VTM35/VTM36) as well (b) separately controlling the LED bar in "Alert" mode for the VTM30, VTM31, and VTM35.
 * Ability to configure device features from the driver
 * Button Tapping (coming in a future update, after Hubitat gets further along in their Matter implementation)
 
@@ -17,26 +17,31 @@ There appear to be some issues with subscribing to device reports and other feat
 
 ## Installation
 
-1 Install all 4 files in your Hubitat "Driver Code" library, here:
+1 Install all 5 files in your Hubitat "Driver Code" library, here:
 
-![image](https://github.com/user-attachments/assets/d5a1fda5-8b60-4eb7-9653-23e5dd1c72bb)
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/1fb26f4a-b781-482c-aa31-bc128891cb71" />
 
-2 Pair your  VTM31SN to Hubitat.  It will install with a default driver of "Device". You are going to need to change this:
-![image](https://github.com/user-attachments/assets/c9c521ce-ea01-45b4-93e2-fea2b8110d24)
+2 Pair your  device to Hubitat.  Hubitat *should* select the correct driver ("Inovelli White Series Matter Advanced Device Driver"). Confirm (or update) the selected device driver following these steps:
 
-3 Change the default driver to "Inovelli VTM31-SN Advanced Device Driver and save the change":
-![image](https://github.com/user-attachments/assets/be97cb3f-4a83-4573-90c9-aed7f3ee0178)
+First, select the device
+<img width="1873" height="570" alt="image" src="https://github.com/user-attachments/assets/6e9a5f61-5b86-45a5-9614-cbb111a3e6a6" />
 
-4 At the top of the page, select "Initialize", then wait about 15 seconds and refresh your screen (Ctrl + F5 for Chrome).
-![image](https://github.com/user-attachments/assets/df75cf1f-31ad-4fc9-b506-6935c39d73cd)
+Then, from its "Device info" tab, confirm (or update) the driver type and save the change.
+<img width="1897" height="657" alt="image" src="https://github.com/user-attachments/assets/336ef29e-6369-49e3-b0d0-8a0ac93e6a29" />
 
-5. If everything installed correctly, you will see 2 new child devices shown at the bottom of the screen
-![image](https://github.com/user-attachments/assets/cb973d04-dd73-4396-b399-6a64e5e3fd98)
-These two child devices are how you will control the Inovelli switch.
+3 From the device's "Commands" tab, run the "Initialize" command, then wait about 15 seconds and refresh your screen (Ctrl + F5 for Chrome).
+<img width="1878" height="672" alt="image" src="https://github.com/user-attachments/assets/b6470605-6f3b-430e-b316-b6419e5c04d8" />
+
+
+5. If everything installed correctly, you will see 2 child devices on the "Child devices" tab.
+<img width="1455" height="325" alt="image" src="https://github.com/user-attachments/assets/e3c0379c-dcd4-4bff-800a-db3646e4d4c1" />
+
+For example, for the VTM31, there will be two child devices. These two child devices are how you will control the Inovelli switch.
 * The first child device ("Load Control") is used for control of the load (i.e., your lights!).
-* The second child device ("LED Alert Strip") allows you to control the LED bar as an alert indicator. For example, changing its color to indicate an alarm or other event happening in your home.
+* The second child device ("LED Notification Bar") allows you to control the LED bar as an alert indicator. For example, changing its color to indicate an alarm or other event happening in your home.
   
 6. Also, if everthing went correctly, your "Preferences" section will show controls for setting device configuration features.
-  ![image](https://github.com/user-attachments/assets/e9245157-6fb0-443f-a841-27600449125e)
+<img width="1861" height="776" alt="image" src="https://github.com/user-attachments/assets/35f0a93c-3d2c-440a-ac28-49fabf367193" />
 
-7. If each of these controls displays a message saying to Refresh (rather than displaying what the control does), you need to click the "Refresh" button on again.
+
+7. If each of these controls displays a message saying to Refresh (rather than displaying what the control does), you need to run the "Initialize" command again.
