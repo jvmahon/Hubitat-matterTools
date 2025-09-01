@@ -10,14 +10,17 @@ The Hubitat 2.4 firmware version has updated their interface. This documentation
 This driver supports several advanced features for the VTM30, VTM31, VTM36 and VTM36 switches including:
 * Support for controlling (a) the main electrical Load (switch for VTM30, dimmer for VTM31, and both dimmer and fan for VTM35/VTM36) as well (b) separately controlling the LED bar in "Alert" mode for the VTM30, VTM31, and VTM35.
 * Ability to configure device features from the driver
-* Button Tapping (coming in a future update, after Hubitat gets further along in their Matter implementation)
+* Button Tapping support (Single Tap, Double Tap, Hold, Release) for VTM30, VTM31, VTM35.
+* Temperature and Humidity support for FTM30.
 
 At this time, Hubitat's Matter implementation is still under early development and there are a number of issues that remain for them to resolve. 
 There appear to be some issues with subscribing to device reports and other features, so reliability may be an issue.
 
 ## Installation
 
-1 Install all 5 files in your Hubitat "Driver Code" library, here:
+### New Installations
+
+1 Unpack the Zip file and Install all of the driver files in your Hubitat "Driver Code" library, here:
 
 <img width="200" alt="image" src="https://github.com/user-attachments/assets/1fb26f4a-b781-482c-aa31-bc128891cb71" />
 
@@ -45,3 +48,14 @@ For example, for the VTM31, there will be two child devices. These two child dev
 
 
 7. If each of these controls displays a message saying to Refresh (rather than displaying what the control does), you need to run the "Initialize" command again.
+
+### Updating a Prior Installation
+
+1. Follow the instructions for "New Installations", then
+
+2. If you have VTM31 switches, for the Load Control child device of each switch, change the driver to "Matter Generic Component Tapable Dimmer" to enable button tapping support.
+
+3. If you have the VTM35 switch, for the Load Control child device of each switch, change the driver to "Matter Inovelli Fan Tapable Component" to enable button tapping support.
+
+4. Restart Hubitat.
+
